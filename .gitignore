@@ -1,0 +1,13 @@
+.history/
+.vscode/
+
+test*
+config.py
+
+__pycache__
+*.tar
+*.sh
+cobs/__pycache__/*
+result/
+data/denvertest/
+data/dooetest/

@@ -1,0 +1,33 @@
+# General Settings
+building_name: DOOE Building
+building_idf_file: data/eplus_files/buildings/DOEE_V930.idf
+weather_file: data/eplus_files/weather/USA_CA_San.Francisco.Intl.AP.724940_TMY3.epw
+num_zones: 11
+
+observations:
+  - outdoor temperature
+  - site solar radiation
+  - time
+  - zone humidity
+  - zone temperature
+  - occupancy
+
+timestep_per_hour: 4
+
+max_energy_consumption: 57561696.237888955
+min_energy_consumption: 17976704.46193411
+
+# Building Settings
+available_zones:
+  - Amphitheater
+  - Lab
+  - Library
+  - North-1
+  - North-2
+  - North-3
+  - North-G
+  - South-1
+  - South-2
+  - South-3
+  - South-GF
+

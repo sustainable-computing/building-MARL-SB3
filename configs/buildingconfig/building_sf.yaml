@@ -1,0 +1,74 @@
+# General Settings
+building_name: San Francisco Building
+building_idf_file: data/eplus_files/buildings/OfficeMedium_SF.idf
+weather_file: data/eplus_files/weather/USA_CA_San.Francisco.Intl.AP.724940_TMY3.epw
+num_zones: 15
+
+observations:
+  - outdoor temperature
+  - site solar radiation
+  - time
+  - zone humidity
+  - zone temperature
+  - occupancy
+
+timestep_per_hour: 4
+
+max_energy_consumption: 127149241.43899378
+min_energy_consumption: 7253970.9438649295
+
+
+# Building Settings
+available_zones:
+  - TopFloor_Plenum
+  - MidFloor_Plenum
+  - FirstFloor_Plenum
+  - Core_top
+  - Core_mid
+  - Core_bottom
+  - Perimeter_top_ZN_3
+  - Perimeter_top_ZN_2
+  - Perimeter_top_ZN_1
+  - Perimeter_top_ZN_4
+  - Perimeter_bot_ZN_3
+  - Perimeter_bot_ZN_2
+  - Perimeter_bot_ZN_1
+  - Perimeter_bot_ZN_4
+  - Perimeter_mid_ZN_3
+  - Perimeter_mid_ZN_2
+  - Perimeter_mid_ZN_1
+  - Perimeter_mid_ZN_4
+
+control_zones:
+  - Core_top
+  - Core_mid
+  - Core_bottom
+  - Perimeter_top_ZN_3
+  - Perimeter_top_ZN_2
+  - Perimeter_top_ZN_1
+  - Perimeter_top_ZN_4
+  - Perimeter_bot_ZN_3
+  - Perimeter_bot_ZN_2
+  - Perimeter_bot_ZN_1
+  - Perimeter_bot_ZN_4
+  - Perimeter_mid_ZN_3
+  - Perimeter_mid_ZN_2
+  - Perimeter_mid_ZN_1
+  - Perimeter_mid_ZN_4
+
+airloops:
+  Core_top: PACU_VAV_top
+  Core_mid: PACU_VAV_mid
+  Core_bottom: PACU_VAV_bot
+  Perimeter_top_ZN_3: PACU_VAV_top
+  Perimeter_top_ZN_2: PACU_VAV_top
+  Perimeter_top_ZN_1: PACU_VAV_top
+  Perimeter_top_ZN_4: PACU_VAV_top
+  Perimeter_bot_ZN_3: PACU_VAV_bot
+  Perimeter_bot_ZN_2: PACU_VAV_bot
+  Perimeter_bot_ZN_1: PACU_VAV_bot
+  Perimeter_bot_ZN_4: PACU_VAV_bot
+  Perimeter_mid_ZN_3: PACU_VAV_mid
+  Perimeter_mid_ZN_2: PACU_VAV_mid
+  Perimeter_mid_ZN_1: PACU_VAV_mid
+  Perimeter_mid_ZN_4: PACU_VAV_mid
