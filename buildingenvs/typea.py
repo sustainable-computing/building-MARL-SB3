@@ -112,7 +112,7 @@ class TypeABuilding(Building):
         zonewise_state = self.get_state_dict(state)
         self.total_energy_consumption += state["total hvac"]
         self.current_obs_timestep = state["time"].hour
-        rewards = np.array([state["total hvac"]]*len(self.control_zones))
+        rewards = np.array([-state[f"{zone} vav energy"] for zone in self.control_zones])
         done = self.model.is_terminate()
         info = {}
         return zonewise_state, rewards, done, info

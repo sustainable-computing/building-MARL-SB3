@@ -124,12 +124,14 @@ class MultiAgentACPolicy(ActorCriticPolicy):
         distribution = self._get_action_dist_from_latent(latent_pi)
         actions = distribution.get_actions(deterministic=deterministic)
         log_prob = distribution.log_prob(actions)
+        actions = 1 / (1 + th.exp(-actions))
         return actions, vf, log_prob
 
     def evaluate_actions(self, obs: th.Tensor, actions: th.Tensor) -> Tuple[th.Tensor, th.Tensor, th.Tensor]:
         latent_pi, vf = self.mlp_extractor(obs)
         distribution = self._get_action_dist_from_latent(latent_pi)
-        log_prob = distribution.log_prob(actions)
+        inv_sigm_actions = th.log(actions / (1 - actions))
+        log_prob = distribution.log_prob(inv_sigm_actions)
         entropy = distribution.entropy()
         return vf, log_prob, entropy
 
