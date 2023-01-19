@@ -15,11 +15,13 @@ class MultiAgentNetworkV1(nn.Module):
         self,
         feature_dim: int,
         control_zones: List[str],
+        device: th.device = th.device("cpu"),
     ):
         super().__init__()
         self.actor_networks = nn.ModuleDict()
         self.critic_networks = nn.ModuleDict()
         self.control_zones = control_zones
+        self.train_device = device
 
         for zone in control_zones:
             self.actor_networks[zone] = nn.Sequential(
@@ -41,8 +43,10 @@ class MultiAgentNetworkV1(nn.Module):
         self.latent_dim_vf = len(control_zones)
 
     def forward(self, features: th.DictType) -> th.Tensor:
-        actions = th.zeros(size=(len(features[self.control_zones[0]]), 1, len(self.control_zones),))
-        values = th.zeros(size=(len(features[self.control_zones[0]]), 1, len(self.control_zones),))
+        actions = th.zeros(size=(len(features[self.control_zones[0]]), 1, len(self.control_zones),),
+                           device=self.train_device)
+        values = th.zeros(size=(len(features[self.control_zones[0]]), 1, len(self.control_zones),),
+                          device=self.train_device)
         for i, zone in enumerate(self.control_zones):
             actions[:, :, i] = self.actor_networks[zone](features[zone])
             values[:, :, i] = self.critic_networks[zone](features[zone])
@@ -74,9 +78,11 @@ class MultiAgentACPolicy(ActorCriticPolicy):
                  control_zones: List[str],
                  net_arch: Optional[List[Union[int, Dict[str, List[int]]]]] = None,
                  activation_fn: Type[nn.Module] = nn.Tanh,
+                 device: th.device = th.device("cpu"),
                  *args,
                  **kwargs):
         self.control_zones = control_zones
+        self.train_device = device
 
         super().__init__(
             observation_space,
@@ -96,8 +102,10 @@ class MultiAgentACPolicy(ActorCriticPolicy):
         self.features_dim = self.observation_space[self.control_zones[0]].shape[0]
         self.mlp_extractor = MultiAgentNetworkV1(
             feature_dim=self.features_dim,
-            control_zones=self.control_zones
+            control_zones=self.control_zones,
+            device=self.train_device
         )
+        self.mlp_extractor.to(self.train_device)
 
     def _rebuild(self, lr_schedule):
         self.action_dist = \
