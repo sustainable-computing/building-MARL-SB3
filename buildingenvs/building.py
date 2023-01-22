@@ -28,7 +28,7 @@ class Building(gym.Env):
         self.log_dir = log_dir
 
     def set_runperiod(self, days: int, start_year: int, start_month: int,
-                      start_day: int, specify_year: bool):
+                      start_day: int, specify_year: bool = False):
         self.model.set_runperiod(days=days, start_year=start_year, start_month=start_month,
                                  start_day=start_day, specify_year=specify_year)
 

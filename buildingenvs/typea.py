@@ -43,7 +43,7 @@ class TypeABuilding(Building):
                                          {
                                             "Name": f"{zone} VAV Customized Schedule",
                                             "Schedule Type Limits Name": "Fraction",
-                                            "Hourly Value": 0.1
+                                            "Hourly Value": 0
                                          })
             self.model.edit_configuration(idf_header_name="AirTerminal:SingleDuct:VAV:Reheat",
                                           identifier={
@@ -104,14 +104,14 @@ class TypeABuilding(Building):
                 "component_type": "Schedule:Constant",
                 "control_type": "Schedule Value",
                 "actuator_key": f"{zone} VAV Customized Schedule",
-                "value": action,
+                "value": action.item(),
                 "start_time": self.current_obs_timestep + 1
                 })
 
         state = self.model.step(action_list)
         zonewise_state = self.get_state_dict(state)
         self.total_energy_consumption += state["total hvac"]
-        self.current_obs_timestep = state["time"].hour
+        self.current_obs_timestep = state["timestep"]
         rewards = np.array([-state[f"{zone} vav energy"] for zone in self.control_zones])
         done = self.model.is_terminate()
         info = {}
@@ -121,5 +121,5 @@ class TypeABuilding(Building):
         state = self.model.reset()
         zonewise_state = self.get_state_dict(state)
         self.total_energy_consumption = state["total hvac"]
-        self.current_obs_timestep = state["time"].hour
+        self.current_obs_timestep = state["timestep"]
         return zonewise_state
