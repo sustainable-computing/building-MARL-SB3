@@ -172,7 +172,7 @@ def main():
     total_timesteps = args.num_episodes * 4 * 24 * args.num_train_days
 
     model.learn(total_timesteps=total_timesteps, progress_bar=True, callback=callbacks,
-                tb_log_name=args.experiment_name)
+                tb_log_name=args.run_name)
     model.save(os.path.join(model_dir, "final_model"))
 
 
