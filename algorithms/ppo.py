@@ -188,4 +188,3 @@ class MultiAgentPPO(PPO):
         self.logger.record("train/clip_range", clip_range)
         if self.clip_range_vf is not None:
             self.logger.record("train/clip_range_vf", clip_range_vf)
-        self.logger.record("train/energy_consumption", self.env.envs[0].total_energy_consumption)

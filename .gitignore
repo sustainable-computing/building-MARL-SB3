@@ -7,6 +7,7 @@ config.py
 __pycache__
 *.tar
 *.sh
+*.out
 cobs/__pycache__/*
 result/
 data/denvertest/

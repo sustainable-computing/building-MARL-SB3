@@ -6,10 +6,12 @@ from cobs import Model
 
 
 class TypeABuilding(Building):
-    def __init__(self, config: dict, log_dir: str, energy_plus_dir: str):
+    def __init__(self, config: dict, log_dir: str, energy_plus_dir: str, logger: object=None):
         super().__init__(config, log_dir)
 
         Model.set_energyplus_folder(energy_plus_dir)
+        
+        self.logger = logger
 
         self.action_space = spaces.Box(low=0, high=1, shape=(self.num_zones,))
 
@@ -118,6 +120,7 @@ class TypeABuilding(Building):
         return zonewise_state, rewards, done, info
 
     def reset(self):
+        self.logger.record("total_energy_consumption", self.total_energy_consumption)
         state = self.model.reset()
         zonewise_state = self.get_state_dict(state)
         self.total_energy_consumption = state["total hvac"]
