@@ -108,6 +108,7 @@ class MultiAgentACPolicy(ActorCriticPolicy):
         self.mlp_extractor.to(self.train_device)
 
     def _rebuild(self, lr_schedule):
+        self._build_mlp_extractor()
         self.action_dist = \
             MultiAgentDiagGaussianDistribution(action_dim=int(np.prod(self.action_space.shape)))
         self.action_net, self.log_std = self.action_dist.proba_distribution_net(

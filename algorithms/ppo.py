@@ -61,6 +61,7 @@ class MultiAgentPPO(PPO):
             clip_range_vf = self.clip_range_vf(self._current_progress_remaining)
 
         entropy_losses = []
+        all_entropy_losses = [[] for _ in range(self.policy.action_space.shape[0])]
         all_pg_losses = [[] for _ in range(self.policy.action_space.shape[0])]
         all_value_losses = [[] for _ in range(self.policy.action_space.shape[0])]
         pg_losses, value_losses = [], []
@@ -87,8 +88,10 @@ class MultiAgentPPO(PPO):
                 # Normalize advantage
                 advantages = rollout_data.advantages
                 # Normalization does not make sense if mini batchsize == 1, see GH issue #325
+
                 if self.normalize_advantage and len(advantages) > 1:
-                    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+                    for idx in range(self.policy.action_space.shape[0]):
+                        advantages[:, idx] = (advantages[:, idx] - advantages[:, idx].mean()) / (advantages[:, idx].std() + 1e-8)
 
                 # ratio between old and new policy, should be one at the first iteration
                 ratio = th.exp(log_prob - rollout_data.old_log_prob)
@@ -121,11 +124,11 @@ class MultiAgentPPO(PPO):
                 # Entropy loss favor exploration
                 if entropy is None:
                     # Approximate entropy when no analytical form
-                    entropy_loss = -th.mean(-log_prob)
+                    entropy_loss = -th.mean(-log_prob, axis=0)
                 else:
-                    entropy_loss = -th.mean(entropy)
-
-                entropy_losses.append(entropy_loss.item())
+                    entropy_loss = -th.mean(entropy, axis=0)
+                for i in range(len(entropy_loss)):
+                    all_entropy_losses[i].append(entropy_loss[i].item())
 
                 loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
 
@@ -161,7 +164,9 @@ class MultiAgentPPO(PPO):
         explained_var = explained_variance(self.rollout_buffer.values.flatten(), self.rollout_buffer.returns.flatten())
 
         # Logs
-        self.logger.record("train/entropy_loss", np.mean(entropy_losses))
+        for i in range(len(all_entropy_losses)):
+            self.logger.record(f"train/entropy_loss_{i}", np.mean(all_entropy_losses[i]))
+        # self.logger.record("train/entropy_loss", np.mean(entropy_losses))
         for i in range(len(all_pg_losses)):
             self.logger.record(f"train/policy_gradient_loss_{i}", np.mean(all_pg_losses[i]))
         # self.logger.record("train/policy_gradient_loss", np.mean(pg_losses))
