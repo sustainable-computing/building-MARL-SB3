@@ -6,11 +6,15 @@ from cobs import Model
 
 
 class TypeABuilding(Building):
-    def __init__(self, config: dict, log_dir: str, energy_plus_dir: str, logger: object=None):
+    def __init__(self,
+                 config: dict,
+                 log_dir: str,
+                 energy_plus_dir: str,
+                 logger: object = None):
         super().__init__(config, log_dir)
 
         Model.set_energyplus_folder(energy_plus_dir)
-        
+
         self.logger = logger
 
         self.action_space = spaces.Box(low=0, high=1, shape=(self.num_zones,))

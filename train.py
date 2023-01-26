@@ -10,7 +10,6 @@ from algorithms.ppo import MultiAgentPPO
 from buildingenvs import TypeABuilding
 from config import energy_plus_loc
 from config import device
-from callbacks import TotalEnergyCallback
 from policies.multiagentpolicy import MultiAgentACPolicy
 
 
@@ -42,7 +41,7 @@ def parse_args():
                         type=int,
                         help="The year to train on",
                         default=1991)
-    
+
     parser.add_argument("--train_month",
                         type=int,
                         help="The month to train on",

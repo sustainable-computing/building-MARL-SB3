@@ -6,10 +6,16 @@ from cobs import Model
 
 
 class DOOEBuilding(Building):
-    def __init__(self, config: dict, log_dir: str, energy_plus_dir: str):
+    def __init__(self,
+                 config: dict,
+                 log_dir: str,
+                 energy_plus_dir: str,
+                 logger: object = None):
         super().__init__(config=config, log_dir=log_dir)
 
         Model.set_energyplus_folder(energy_plus_dir)
+
+        self.logger = logger
 
         self.action_space = spaces.Box(low=0, high=1, shape=(self.num_zones,))
 
@@ -42,7 +48,7 @@ class DOOEBuilding(Building):
                                          {
                                             "Name": f"{zone} VAV Customized Schedule",
                                             "Schedule Type Limits Name": "Fraction",
-                                            "Hourly Value": 0.1
+                                            "Hourly Value": 0
                                          })
             self.model.edit_configuration(idf_header_name="AirTerminal:SingleDuct:VAV:Reheat",
                                           identifier={"Name": f"VAV HW Rht {zone}"},
@@ -108,15 +114,16 @@ class DOOEBuilding(Building):
         state = self.model.step(action_list)
         zonewise_state = self.get_state_dict(state)
         self.total_energy_consumption += state["total hvac"]
-        self.current_obs_timestep = state["time"].hour
-        rewards = np.array([state["total hvac"]]*len(self.control_zones))
+        self.current_obs_timestep = state["timestep"]
+        rewards = np.array([-state[f"{zone} vav energy"] for zone in self.control_zones])
         done = self.model.is_terminate()
         info = {}
         return zonewise_state, rewards, done, info
 
     def reset(self):
+        self.logger.record("total_energy_consumption", self.total_energy_consumption)
         state = self.model.reset()
         zonewise_state = self.get_state_dict(state)
         self.total_energy_consumption = state["total hvac"]
-        self.current_obs_timestep = state["time"].hour
+        self.current_obs_timestep = state["timestep"]
         return zonewise_state
