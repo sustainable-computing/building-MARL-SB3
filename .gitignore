@@ -10,5 +10,4 @@ __pycache__
 *.out
 cobs/__pycache__/*
 result/
-data/denvertest/
-data/dooetest/
+data/*test/

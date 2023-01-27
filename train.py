@@ -8,6 +8,7 @@ import yaml
 
 from algorithms.ppo import MultiAgentPPO
 from buildingenvs import TypeABuilding
+from buildingenvs import DOOEBuilding
 from config import energy_plus_loc
 from config import device
 from policies.multiagentpolicy import MultiAgentACPolicy
@@ -20,17 +21,17 @@ def parse_args():
                         type=str,
                         help="The building environment to train agents on",
                         choices=["denver", "sf", "doee"],
-                        default="sf")
+                        default="doee")
 
     parser.add_argument("--building_config_loc",
                         type=str,
                         help="The location of the building config file",
-                        default="configs/buildingconfig/building_denver.yaml")
+                        default="configs/buildingconfig/building_dooe.yaml")
 
     parser.add_argument("--run_name",
                         type=str,
                         help="The name of the run",
-                        default="denvertest")
+                        default="doeetest")
 
     parser.add_argument("--log_dir",
                         type=str,
@@ -111,15 +112,13 @@ def get_env(building_env, building_config_loc,
             log_dir, energy_plus_loc, args,
             logger):
     config = load_building_config(building_config_loc)
-    if building_env == "denver":
+    if building_env in ["denver", "sf"]:
         env = TypeABuilding(config, log_dir, energy_plus_loc, logger)
-    elif building_env == "sf":
-        raise NotImplementedError
     elif building_env == "doee":
-        raise NotImplementedError
+        env = DOOEBuilding(config, log_dir, energy_plus_loc, logger)
 
     env.set_runperiod(args.num_train_days, args.train_year, args.train_month, args.train_day)
-    env.set_timestep(config.timesteps_per_hour)
+    env.set_timestep(config["timesteps_per_hour"])
     return env, config
 
 
@@ -137,7 +136,7 @@ def get_callbacks(model_save_freq, log_dir):
 
 
 def get_model(env, args, config):
-    n_steps = config.timesteps_per_hour * 24 * args.num_train_days
+    n_steps = config["timesteps_per_hour"] * 24 * args.num_train_days
     model = MultiAgentPPO(MultiAgentACPolicy, env, verbose=1,
                           n_steps=n_steps, batch_size=args.batch_size,
                           device=device, policy_kwargs={"control_zones": env.control_zones,
@@ -146,29 +145,32 @@ def get_model(env, args, config):
     return model
 
 
-def save_run_config(log_dir, args):
+def save_configs(log_dir, args, building_config):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     with open(os.path.join(log_dir, "run_config.yaml"), "w") as f:
         yaml.dump(args, f)
+    with open(os.path.join(log_dir, "building_config.yaml"), "w") as f:
+        yaml.dump(building_config, f)
 
 
 def main():
     args = parse_args()
 
     log_dir, model_dir = get_log_dirs(args.log_dir, args.run_name)
-    save_run_config(log_dir, args)
 
     logger = get_logger(log_dir)
     env, config = get_env(args.building_env, args.building_config_loc,
                           log_dir, energy_plus_loc, args, logger)
+
+    save_configs(log_dir, args, config)
 
     callbacks = get_callbacks(args.model_save_freq, model_dir)
 
     model = get_model(env, args, config)
     model.set_logger(logger)
 
-    total_timesteps = args.num_episodes * config.timesteps_per_hour * 24 * args.num_train_days
+    total_timesteps = args.num_episodes * config["timesteps_per_hour"] * 24 * args.num_train_days
 
     model.learn(total_timesteps=total_timesteps, progress_bar=True, callback=callbacks,
                 tb_log_name=args.run_name)
