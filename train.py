@@ -2,6 +2,7 @@ import argparse
 from datetime import datetime
 import os
 from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.logger import configure
 import yaml
 
@@ -80,6 +81,11 @@ def parse_args():
                         help="The size of each batch",
                         default=32)
 
+    parser.add_argument("--seed",
+                        type=int,
+                        help="The random seed to use",
+                        default=1337)
+
     args = parser.parse_args()
     return args
 
@@ -156,6 +162,8 @@ def save_configs(log_dir, args, building_config):
 
 def main():
     args = parse_args()
+
+    set_random_seed(args.seed, use_cuda="cuda" in device)
 
     log_dir, model_dir = get_log_dirs(args.log_dir, args.run_name)
 
