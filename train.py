@@ -20,8 +20,8 @@ def parse_args():
     parser.add_argument("--building_env",
                         type=str,
                         help="The building environment to train agents on",
-                        choices=["denver", "sf", "doee"],
-                        default="doee")
+                        choices=["denver", "sf", "dooe"],
+                        default="dooe")
 
     parser.add_argument("--building_config_loc",
                         type=str,
@@ -114,7 +114,7 @@ def get_env(building_env, building_config_loc,
     config = load_building_config(building_config_loc)
     if building_env in ["denver", "sf"]:
         env = TypeABuilding(config, log_dir, energy_plus_loc, logger)
-    elif building_env == "doee":
+    elif building_env == "dooe":
         env = DOOEBuilding(config, log_dir, energy_plus_loc, logger)
 
     env.set_runperiod(args.num_train_days, args.train_year, args.train_month, args.train_day)
