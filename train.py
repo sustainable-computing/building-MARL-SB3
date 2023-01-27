@@ -20,7 +20,7 @@ def parse_args():
                         type=str,
                         help="The building environment to train agents on",
                         choices=["denver", "sf", "doee"],
-                        default="denver")
+                        default="sf")
 
     parser.add_argument("--building_config_loc",
                         type=str,
@@ -119,8 +119,8 @@ def get_env(building_env, building_config_loc,
         raise NotImplementedError
 
     env.set_runperiod(args.num_train_days, args.train_year, args.train_month, args.train_day)
-    env.set_timestep(4)
-    return env
+    env.set_timestep(config.timesteps_per_hour)
+    return env, config
 
 
 def get_logger(log_dir):
@@ -136,8 +136,8 @@ def get_callbacks(model_save_freq, log_dir):
     return callbacks
 
 
-def get_model(env, args):
-    n_steps = 4 * 24 * args.num_train_days
+def get_model(env, args, config):
+    n_steps = config.timesteps_per_hour * 24 * args.num_train_days
     model = MultiAgentPPO(MultiAgentACPolicy, env, verbose=1,
                           n_steps=n_steps, batch_size=args.batch_size,
                           device=device, policy_kwargs={"control_zones": env.control_zones,
@@ -160,15 +160,15 @@ def main():
     save_run_config(log_dir, args)
 
     logger = get_logger(log_dir)
-    env = get_env(args.building_env, args.building_config_loc,
-                  log_dir, energy_plus_loc, args, logger)
+    env, config = get_env(args.building_env, args.building_config_loc,
+                          log_dir, energy_plus_loc, args, logger)
 
     callbacks = get_callbacks(args.model_save_freq, model_dir)
 
-    model = get_model(env, args)
+    model = get_model(env, args, config)
     model.set_logger(logger)
 
-    total_timesteps = args.num_episodes * 4 * 24 * args.num_train_days
+    total_timesteps = args.num_episodes * config.timesteps_per_hour * 24 * args.num_train_days
 
     model.learn(total_timesteps=total_timesteps, progress_bar=True, callback=callbacks,
                 tb_log_name=args.run_name)

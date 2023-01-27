@@ -12,7 +12,7 @@ observations:
   - zone temperature
   - occupancy
 
-timestep_per_hour: 4
+timesteps_per_hour: 4
 
 max_energy_consumption: 144517646.5099022
 min_energy_consumption: 16248682.536965799
