@@ -133,8 +133,8 @@ def get_logger(log_dir):
     return logger
 
 
-def get_callbacks(model_save_freq, log_dir):
-    checkpoint_callback = create_checkpoint_callback(model_save_freq, log_dir)
+def get_callbacks(log_dir, args):
+    checkpoint_callback = create_checkpoint_callback(args.model_save_freq, log_dir, prefix=args.run_name)
     # total_energy_callback = TotalEnergyCallback()
     # callbacks = [checkpoint_callback, total_energy_callback]
     callbacks = [checkpoint_callback]
@@ -173,7 +173,7 @@ def main():
 
     save_configs(log_dir, args, config)
 
-    callbacks = get_callbacks(args.model_save_freq, model_dir)
+    callbacks = get_callbacks(model_dir, args)
 
     model = get_model(env, args, config)
     model.set_logger(logger)
