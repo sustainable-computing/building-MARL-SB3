@@ -70,6 +70,11 @@ def parse_args():
                         type=bool,
                         help="Whether to normalize the calculated advantage",
                         default=False)
+    
+    parser.add_argument("--ent_coef",
+                        type=float,
+                        help="The entropy coefficient",
+                        default=0.01)
 
     parser.add_argument("--num_episodes",
                         type=int,
@@ -148,7 +153,8 @@ def get_model(env, args, config):
                           n_steps=n_steps, batch_size=args.batch_size,
                           device=device, policy_kwargs={"control_zones": env.control_zones,
                                                         "device": device},
-                          normalize_advantage=args.normalize_advantage)
+                          normalize_advantage=args.normalize_advantage,
+                          ent_coef=args.ent_coef)
     return model
 
 
