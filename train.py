@@ -22,17 +22,17 @@ def parse_args():
                         type=str,
                         help="The building environment to train agents on",
                         choices=["denver", "sf", "dooe"],
-                        default="dooe")
+                        default="denver")
 
     parser.add_argument("--building_config_loc",
                         type=str,
                         help="The location of the building config file",
-                        default="configs/buildingconfig/building_dooe.yaml")
+                        default="configs/buildingconfig/building_denver.yaml")
 
     parser.add_argument("--run_name",
                         type=str,
                         help="The name of the run",
-                        default="doeetest")
+                        default="denvertest")
 
     parser.add_argument("--log_dir",
                         type=str,
@@ -134,7 +134,8 @@ def get_logger(log_dir):
 
 
 def get_callbacks(log_dir, args):
-    checkpoint_callback = create_checkpoint_callback(args.model_save_freq, log_dir, prefix=args.run_name)
+    checkpoint_callback = create_checkpoint_callback(args.model_save_freq,
+                                                     log_dir, prefix=args.run_name)
     # total_energy_callback = TotalEnergyCallback()
     # callbacks = [checkpoint_callback, total_energy_callback]
     callbacks = [checkpoint_callback]
@@ -163,7 +164,7 @@ def save_configs(log_dir, args, building_config):
 def main():
     args = parse_args()
 
-    set_random_seed(args.seed, use_cuda="cuda" in device)
+    set_random_seed(args.seed, using_cuda="cuda" in device)
 
     log_dir, model_dir = get_log_dirs(args.log_dir, args.run_name)
 
