@@ -24,23 +24,21 @@ class MultiAgentNetworkV1(nn.Module):
         self.train_device = device
 
         for zone in control_zones:
-            self.actor_networks[zone] = nn.Sequential(
-                nn.Linear(feature_dim, 64),
-                nn.Tanh(),
-                nn.Linear(64, 64),
-                nn.Tanh(),
-                nn.Linear(64, 1),
-            )
-            self.critic_networks[zone] = nn.Sequential(
-                nn.Linear(feature_dim, 64),
-                nn.Tanh(),
-                nn.Linear(64, 64),
-                nn.Tanh(),
-                nn.Linear(64, 1),
-            )
+            self.actor_networks[zone] = self.base_network(feature_dim)
+            self.critic_networks[zone] = self.base_network(feature_dim)
 
         self.latent_dim_pi = len(control_zones)
         self.latent_dim_vf = len(control_zones)
+
+    @classmethod
+    def base_network(cls, feature_dim) -> nn.Module:
+        return nn.Sequential(
+            nn.Linear(feature_dim, 64),
+            nn.Tanh(),
+            nn.Linear(64, 64),
+            nn.Tanh(),
+            nn.Linear(64, 1),
+        )
 
     def forward(self, features: th.DictType) -> th.Tensor:
         actions = th.zeros(size=(len(features[self.control_zones[0]]), 1, len(self.control_zones),),
@@ -151,3 +149,9 @@ class MultiAgentACPolicy(ActorCriticPolicy):
     def predict_values(self, obs: th.Tensor) -> th.Tensor:
         _, values = self.mlp_extractor(obs)
         return values
+
+    def _extract_mlp_zone_policies(self) -> Dict[str, nn.Module]:
+        zone_policies = {}
+        for zone in self.control_zones:
+            zone_policies[zone] = self.mlp_extractor.actor_networks[zone]
+        return zone_policies

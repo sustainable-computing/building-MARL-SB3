@@ -70,7 +70,7 @@ def parse_args():
                         type=bool,
                         help="Whether to normalize the calculated advantage",
                         default=False)
-    
+
     parser.add_argument("--ent_coef",
                         type=float,
                         help="The entropy coefficient",
