@@ -1,18 +1,32 @@
 from algorithms.buffers.dictrolloutbuffer import CustomDictRolloutBuffer
 from buildingenvs.wrappers import MultiAgentDummyVecEnv
+from algorithms.diversity import PPODiversityHandler
 
+import gym
 from gym import spaces
 import numpy as np
 from stable_baselines3 import PPO
 from stable_baselines3.common.utils import explained_variance, get_schedule_fn
+from stable_baselines3.common.policies import BasePolicy
 import torch as th
 from torch.nn import functional as F
 
 
 class MultiAgentPPO(PPO):
-    def __init__(self, policy, env, *args, **kwargs):
+    def __init__(self,
+                 policy: BasePolicy = None,
+                 env: gym.Env = None,
+                 diverse_weight: float = 0.0,
+                 diverse_policies: list = [],
+                 *args, **kwargs):
         env = MultiAgentDummyVecEnv([lambda: env])
         super().__init__(policy, env, *args, **kwargs)
+
+        if PPODiversityHandler.is_diverse_training(diverse_weight, diverse_policies):
+            self.diverse_training = True
+            self.diversity_handler = PPODiversityHandler(diverse_weight, diverse_policies)
+        else:
+            self.diverse_training = False
 
     def _setup_model(self) -> None:
 
@@ -131,6 +145,14 @@ class MultiAgentPPO(PPO):
                     all_entropy_losses[i].append(entropy_loss[i].item())
 
                 loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
+
+                if self.diverse_training:
+                    diversity_loss = \
+                        self.diversity_handler.calculate_diversity_loss(rollout_data.observations,
+                                                                        rollout_data.actions,
+                                                                        rollout_data.returns,
+                                                                        log_prob)
+                    loss += self.diversity_handler.diversity_weight * diversity_loss
 
                 # Calculate approximate form of reverse KL Divergence for early stopping
                 # see issue #417: https://github.com/DLR-RM/stable-baselines3/issues/417

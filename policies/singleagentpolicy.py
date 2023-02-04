@@ -10,77 +10,64 @@ import torch as th
 from torch import nn
 
 
-class MultiAgentNetworkV1(nn.Module):
+class SingleAgentNetworkV1(nn.Module):
     def __init__(
         self,
         feature_dim: int,
-        control_zones: List[str],
+        action_dim: int,
         device: th.device = th.device("cpu"),
     ):
         super().__init__()
-        self.actor_networks = nn.ModuleDict()
-        self.critic_networks = nn.ModuleDict()
-        self.control_zones = control_zones
+
+        self.feature_dim = feature_dim
+        self.action_dim = action_dim
+
+        self.actor_network = self.base_network(feature_dim, action_dim)
+        self.critic_network = self.base_network(feature_dim, action_dim)
+
         self.train_device = device
 
-        for zone in control_zones:
-            self.actor_networks[zone] = self.base_network(feature_dim)
-            self.critic_networks[zone] = self.base_network(feature_dim)
-
-        self.latent_dim_pi = len(control_zones)
-        self.latent_dim_vf = len(control_zones)
+        self.latent_dim_pi = self.action_dim
+        self.latent_dim_vf = self.action_dim
 
     @classmethod
-    def base_network(cls, feature_dim) -> nn.Module:
+    def base_network(cls, feature_dim, action_dim) -> nn.Module:
         return nn.Sequential(
             nn.Linear(feature_dim, 64),
             nn.Tanh(),
             nn.Linear(64, 64),
             nn.Tanh(),
-            nn.Linear(64, 1),
+            nn.Linear(64, action_dim),
         )
 
-    def forward(self, features: th.DictType) -> th.Tensor:
-        actions = th.zeros(size=(len(features[self.control_zones[0]]), 1, len(self.control_zones),),
-                           device=self.train_device)
-        values = th.zeros(size=(len(features[self.control_zones[0]]), 1, len(self.control_zones),),
-                          device=self.train_device)
-        for i, zone in enumerate(self.control_zones):
-            actions[:, :, i] = self.actor_networks[zone](features[zone])
-            values[:, :, i] = self.critic_networks[zone](features[zone])
+    def forward(self, features: th.Tensor) -> th.Tensor:
+        actions = self.actor_networks(features)
+        values = self.critic_networks(features)
 
-        actions = actions.squeeze(1)
-        values = values.squeeze(1)
         return actions, values
 
-    def forward_actor(self, features: th.DictType) -> th.Tensor:
-        actions = {}
-        for zone in self.control_zones:
-            actions[zone] = self.actor_networks[zone](features[zone])
-        actions = actions.squeeze(1)
+    def forward_actor(self, features: th.Tensor) -> th.Tensor:
+        actions = self.actor_network(features)
         return actions
 
-    def forward_critics(self, features: th.DictType) -> th.Tensor:
-        values = {}
-        for zone in self.control_zones:
-            values[zone] = self.critic_networks[zone](features[zone])
-        values = values.squeeze(1)
+    def forward_critics(self, features: th.Tensor) -> th.Tensor:
+        values = self.critic_networks(features)
         return values
 
 
-class MultiAgentACPolicy(ActorCriticPolicy):
+class SingleAgentACPolicy(ActorCriticPolicy):
     def __init__(self,
-                 observation_space: gym.spaces.Dict,
-                 action_space: gym.spaces.Dict,
-                 lr_schedule: Schedule,
-                 control_zones: List[str],
+                 observation_space: gym.spaces.Box,
+                 action_space: gym.spaces.Box,
+                 lr_schedule: Schedule = lambda _: 0.1,
                  net_arch: Optional[List[Union[int, Dict[str, List[int]]]]] = None,
                  activation_fn: Type[nn.Module] = nn.Tanh,
                  device: th.device = th.device("cpu"),
                  *args,
                  **kwargs):
-        self.control_zones = control_zones
         self.train_device = device
+        self.features_dim = observation_space.shape[0]
+        self.actions_dim = action_space.shape[0]
 
         super().__init__(
             observation_space,
@@ -88,19 +75,17 @@ class MultiAgentACPolicy(ActorCriticPolicy):
             lr_schedule,
             net_arch,
             activation_fn,
-            control_zones,
             *args,
             **kwargs
         )
-        self.features_dim = observation_space[self.control_zones[0]].shape[0]
 
         self._rebuild(lr_schedule)
 
     def _build_mlp_extractor(self) -> None:
-        self.features_dim = self.observation_space[self.control_zones[0]].shape[0]
-        self.mlp_extractor = MultiAgentNetworkV1(
+        self.features_dim = self.observation_space.shape[0]
+        self.mlp_extractor = SingleAgentNetworkV1(
             feature_dim=self.features_dim,
-            control_zones=self.control_zones,
+            action_dim=self.actions_dim,
             device=self.train_device
         )
         self.mlp_extractor.to(self.train_device)
@@ -149,14 +134,3 @@ class MultiAgentACPolicy(ActorCriticPolicy):
     def predict_values(self, obs: th.Tensor) -> th.Tensor:
         _, values = self.mlp_extractor(obs)
         return values
-
-    def _extract_mlp_zone_policies(self) -> Dict[str, nn.Module]:
-        zone_policies = {}
-        zone_policy_log_std = {}
-        for i, zone in enumerate(self.control_zones):
-            network = nn.ModuleDict()
-            network["actor_network"] = self.mlp_extractor.actor_networks[zone]
-            network["critic_network"] = self.mlp_extractor.critic_networks[zone]
-            zone_policies[zone] = network
-            zone_policy_log_std[zone] = self.log_std[i].item()
-        return zone_policies, zone_policy_log_std
