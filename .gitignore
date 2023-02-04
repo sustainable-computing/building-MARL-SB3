@@ -11,6 +11,5 @@ __pycache__
 cobs/__pycache__/*
 result/
 data/*test/
-policies/utils/policy_extractor.py
 train.py
 train_test.py
