@@ -10,107 +10,8 @@ from datetime import datetime
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.logger import configure
-import typer
 import os
 import yaml
-
-
-app = typer.Typer()
-
-
-@app.command("optimal")
-def train_optimal(building_env: BuildingEnvStrings =
-                            typer.Option(BuildingEnvStrings.denver.value,
-                                         help="The building environment to train agents on"),
-                  building_config_loc: str =
-                            typer.Option("configs/buildingconfig/building_denver.yaml",
-                                         help="The location of the building config file"),
-                  run_name: str = typer.Option("denvertest",
-                                               help="The name of the run"),
-                  log_dir: str = typer.Option("data/", help="The location to save the logs"),
-                  train_year: int = typer.Option(1991, help="The year to train on"),
-                  train_month: int = typer.Option(1, help="The month to train on"),
-                  train_day: int = typer.Option(1, help="The day to train on"),
-                  num_train_days: int = typer.Option(30, help="The number of days to train on"),
-                  model_save_freq: int = typer.Option(2880, help="The frequency to save the model"),
-                  normalize_advantage: bool =
-                            typer.Option(False, help="Whether to normalize the calculated advantage"),
-                  ent_coef: float = typer.Option(0.01, help="The entropy coefficient"),
-                  num_episodes: int =
-                            typer.Option(500, help="The number of episodes to train for"),
-                  batch_size: int = typer.Option(32, help="The batch size"),
-                  seed: int = typer.Option(1337, help="The seed for the environment"),
-                  device: str = typer.Option("cpu", help="The device to train on"),
-                  energy_plus_loc: str = typer.Option("/Applications/EnergyPlus-9-3-0/",
-                                         help="The location of the energyplus executable")
-                  ):
-    train(building_env=building_env,
-          building_config_loc=building_config_loc,
-          run_name=run_name,
-          log_dir=log_dir,
-          train_year=train_year,
-          train_month=train_month,
-          train_day=train_day,
-          num_train_days=num_train_days,
-          model_save_freq=model_save_freq,
-          normalize_advantage=normalize_advantage,
-          ent_coef=ent_coef,
-          num_episodes=num_episodes,
-          batch_size=batch_size,
-          seed=seed,
-          device=device,
-          energy_plus_loc=energy_plus_loc,
-          diverse_training=False)
-
-
-@app.command("diverse")
-def train_diverse(diverse_policy_library_loc: str =
-                            typer.Option("data/policies/",
-                                         help="The location of the policy library"),
-                  diversity_weight: float = typer.Option(0.01, help="The weight of diversity"),
-                  building_env: BuildingEnvStrings =
-                            typer.Option(BuildingEnvStrings.denver.value,
-                                         help="The building environment to train agents on"),
-                  building_config_loc: str =
-                            typer.Option("configs/buildingconfig/building_denver.yaml",
-                                         help="The location of the building config file"),
-                  run_name: str = typer.Option("denvertest",
-                                               help="The name of the run"),
-                  log_dir: str = typer.Option("data/", help="The location to save the logs"),
-                  train_year: int = typer.Option(1991, help="The year to train on"),
-                  train_month: int = typer.Option(1, help="The month to train on"),
-                  train_day: int = typer.Option(1, help="The day to train on"),
-                  num_train_days: int = typer.Option(30, help="The number of days to train on"),
-                  model_save_freq: int = typer.Option(2880, help="The frequency to save the model"),
-                  normalize_advantage: bool =
-                            typer.Option(False, help="Whether to normalize the calculated advantage"),
-                  ent_coef: float = typer.Option(0.01, help="The entropy coefficient"),
-                  num_episodes: int =
-                            typer.Option(500, help="The number of episodes to train for"),
-                  batch_size: int = typer.Option(32, help="The batch size"),
-                  seed: int = typer.Option(1337, help="The seed for the environment"),
-                  device: str = typer.Option("cpu", help="The device to train on"),
-                  energy_plus_loc: str = typer.Option("/Applications/EnergyPlus-9-3-0/",
-                                         help="The location of the energyplus executable")):
-    train(building_env=building_env,
-          building_config_loc=building_config_loc,
-          run_name=run_name,
-          log_dir=log_dir,
-          train_year=train_year,
-          train_month=train_month,
-          train_day=train_day,
-          num_train_days=num_train_days,
-          model_save_freq=model_save_freq,
-          normalize_advantage=normalize_advantage,
-          ent_coef=ent_coef,
-          num_episodes=num_episodes,
-          batch_size=batch_size,
-          seed=seed,
-          device=device,
-          energy_plus_loc=energy_plus_loc,
-          diverse_training=True,
-          diverse_policy_library_loc=diverse_policy_library_loc,
-          diversity_weight=diversity_weight)
 
 
 def get_log_dirs(log_dir, run_name):
@@ -204,7 +105,27 @@ def get_model(env, args, config):
     return model
 
 
-def train(**kwargs):
+def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
+          building_config_loc: str = "configs/buildingconfig/building_denver.yaml",
+          run_name: str = "denvertest",
+          log_dir: str = "data/trainlogs/",
+          train_year: int = 1991,
+          train_month: int = 1,
+          train_day: int = 1,
+          num_train_days: int = 30,
+          model_save_freq: int = 2880,
+          normalize_advantage: bool = False,
+          ent_coef: float = 0.01,
+          num_episodes: int = 500,
+          batch_size: int = 32,
+          seed: int = 1337,
+          device: str = "cpu",
+          energy_plus_loc: str = "/Applications/EnergyPlus-9-3-0/",
+          diverse_training: bool = False,
+          diverse_policy_library_loc: str = "data/diverse_policies/",
+          diversity_weight: float = 0.1):
+
+    kwargs = locals()
     set_random_seed(kwargs["seed"], using_cuda="cuda" in kwargs["device"])
 
     log_dir, model_dir = get_log_dirs(kwargs["log_dir"], kwargs["run_name"])
@@ -233,7 +154,7 @@ if __name__ == "__main__":
         building_env="dooe",
         building_config_loc="data/building_config/dooe.yaml",
         run_name="dooe",
-        log_dir="data/logs",
+        log_dir="data/trainlogs/",
         train_year=1991,
         train_month=1,
         train_day=1,

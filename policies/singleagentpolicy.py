@@ -41,8 +41,8 @@ class SingleAgentNetworkV1(nn.Module):
         )
 
     def forward(self, features: th.Tensor) -> th.Tensor:
-        actions = self.actor_networks(features)
-        values = self.critic_networks(features)
+        actions = self.actor_network(features)
+        values = self.critic_network(features)
 
         return actions, values
 
@@ -51,7 +51,7 @@ class SingleAgentNetworkV1(nn.Module):
         return actions
 
     def forward_critics(self, features: th.Tensor) -> th.Tensor:
-        values = self.critic_networks(features)
+        values = self.critic_network(features)
         return values
 
 
@@ -126,6 +126,13 @@ class SingleAgentACPolicy(ActorCriticPolicy):
         log_prob = distribution.log_prob(inv_sigm_actions)
         entropy = distribution.entropy()
         return vf, log_prob, entropy
+
+    def get_probability(self, obs: th.Tensor, actions: th.Tensor) -> th.Tensor:
+        latent_pi, _ = self.mlp_extractor(obs)
+        distribution = self._get_action_dist_from_latent(latent_pi)
+        inv_sigm_actions = th.log(actions / (1 - actions))
+        log_prob = distribution.log_prob(inv_sigm_actions)
+        return log_prob.exp()
 
     def get_distribution(self, obs: th.Tensor) -> Distribution:
         latent_pi, _ = self.mlp_extractor(obs)

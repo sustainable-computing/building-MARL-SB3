@@ -1,5 +1,5 @@
 import typer
-from train.ppo_train import app as ppo_app
+from train.ppo.commands import app as ppo_app
 
 
 app = typer.Typer()
