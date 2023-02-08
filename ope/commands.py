@@ -37,4 +37,5 @@ def evaluate_ope(methods: List[OPEMethodStrings] = typer.Argument(
                  parallelize: bool = typer.Option(False),
                  max_cpu_cores: int = typer.Option(1)):
     methods = [method.value for method in methods]
+    policy_type = policy_type.value
     evaluate(**locals())
