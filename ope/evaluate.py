@@ -12,6 +12,7 @@ import os
 import pandas as pd
 import pickle
 import tqdm
+import yaml
 
 
 def evaluate(methods: List[str] = ["ipw"],
@@ -27,7 +28,6 @@ def evaluate(methods: List[str] = ["ipw"],
              parallelize: bool = False,
              max_cpu_cores: int = 1):
     kwargs = locals()
-
     for method in methods:
         assert method in OPEMethodStrings._value2member_map_, \
             f"Invalid method. Please choose from {OPEMethodStrings._value2member_map_.keys()}"
@@ -38,6 +38,7 @@ def evaluate(methods: List[str] = ["ipw"],
             behavior_policy = pickle.load(f)
 
     save_path = _create_save_path(save_path, methods)
+    _save_run_config(save_path, kwargs)
 
     log_data_df = pd.read_csv(log_data_path)
     log_data_df["time"] = pd.to_datetime(log_data_df["time"])
@@ -94,6 +95,11 @@ def _create_save_path(save_dir, methods):
         method_path = os.path.join(save_path, method)
         os.makedirs(method_path)
     return save_path
+
+
+def _save_run_config(save_path, args):
+    with open(os.path.join(save_path, "run_config.yaml"), "w") as f:
+        yaml.dump(args, f)
 
 
 def get_policy_score(method: str,
