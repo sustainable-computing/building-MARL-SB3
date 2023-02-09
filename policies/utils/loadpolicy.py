@@ -10,7 +10,8 @@ def load_policy_library(policy_library_path: str, policy_type: str,
                         init_log_std: float = np.log(0.1), init_log_std_path: str = "",
                         eval_mode: bool = True):
     policy_paths = glob.glob(os.path.join(policy_library_path, "**.pt**"))
-
+    if len(policy_paths) == 0:
+        raise ValueError(f"No policies found in {policy_library_path}")
     policies = []
     for policy_path in policy_paths:
         policy = th.load(policy_path)
