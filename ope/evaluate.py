@@ -26,7 +26,8 @@ def evaluate(methods: List[str] = ["ipw"],
              behavior_policy_path: str = "data/rule_based_log_data/denver/action_probs_all_data.pkl",
              save_path: str = "data/policy_evaluation/ope/",
              parallelize: bool = False,
-             max_cpu_cores: int = 1):
+             max_cpu_cores: int = 1,
+             gaussian_kernel_bandwidth: float = 0.3):
     kwargs = locals()
     for method in methods:
         assert method in OPEMethodStrings._value2member_map_, \
@@ -59,7 +60,7 @@ def evaluate(methods: List[str] = ["ipw"],
     for method in methods:
         for zone in zones:
             zone_log_data_df = log_data_df[log_data_df["zone"] == zone]
-            method_obj = _get_method(method, zone_log_data_df)
+            method_obj = _get_method(method, zone_log_data_df, kwargs)
             for policy, policy_path in tqdm.tqdm(zip(policies, policy_paths), total=len(policies)):
                 score = method_obj.evaluate_policy(evaluation_policy=policy,
                                                    evaluation_policy_distribution_fuc=policy.get_distribution,
@@ -76,7 +77,7 @@ def evaluate(methods: List[str] = ["ipw"],
             pickle.dump(policy_scores[method], f)
 
 
-def _get_method(method, log_data):
+def _get_method(method, log_data, kwargs):
     if method == OPEMethodStrings.ipw.value:
         method_obj = InverseProbabilityWeighting(log_data)
     elif method == OPEMethodStrings.snip.value:
@@ -84,7 +85,8 @@ def _get_method(method, log_data):
     elif method == OPEMethodStrings.snipw.value:
         method_obj = SelfNormalizedInverseProbabilityWeighting(log_data)
     elif method == OPEMethodStrings.gk.value:
-        method_obj = GaussianKernel(log_data)
+        method_obj = GaussianKernel(log_data=log_data,
+                                    bandwidth=kwargs["gaussian_kernel_bandwidth"])
 
     return method_obj
 

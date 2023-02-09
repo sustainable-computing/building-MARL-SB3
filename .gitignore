@@ -17,5 +17,7 @@ data/policy_evaluation/
 data/policy_librar*
 data/*logs
 
+notebooks/
+
 train.py
 train_test.py

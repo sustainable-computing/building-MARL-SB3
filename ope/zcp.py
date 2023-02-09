@@ -86,10 +86,9 @@ class SNIP(OPEBase):
 
 class GaussianKernel(OPEBase):
     def __init__(self, log_data: pd.DataFrame = None,
-                 kernel: str = "gaussian",
-                 bandwidth: float = 0.02):
+                 bandwidth: float = 0.3):
         self.log_data = log_data
-        self.kernel = kernel
+        self.kernel = "gaussian"
         self.bandwidth = bandwidth
 
         self.process_log_data()

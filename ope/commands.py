@@ -35,7 +35,8 @@ def evaluate_ope(methods: List[OPEMethodStrings] = typer.Argument(
                  behavior_policy_path: str = typer.Option(""),
                  save_path: str = typer.Option("data/policy_evaluation/ope/"),
                  parallelize: bool = typer.Option(False),
-                 max_cpu_cores: int = typer.Option(1)):
+                 max_cpu_cores: int = typer.Option(1),
+                 gaussian_kernel_bandwidth: float = typer.Option(0.3),):
     methods = [method.value for method in methods]
     policy_type = policy_type.value
     evaluate(**locals())
