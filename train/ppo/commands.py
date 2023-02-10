@@ -59,9 +59,11 @@ def train_optimal():
 @app.command("diverse")
 def train_diverse(diverse_policy_library_loc: str = typer.Option(
                     "data/policies/", help="The location of the policy library"),
-                  diversity_weight: float = typer.Option(0.01, help="The weight of diversity")):
+                  diversity_weight: float = typer.Option(0.01, help="The weight of diversity"),
+                  diverse_policy_library_log_std_loc: str = typer.Option("", help="The location of the policy library log stds")):
     from train.ppo.train_ppo import train
     state["diverse_policy_library_loc"] = diverse_policy_library_loc
     state["diversity_weight"] = diversity_weight
     state["diverse_training"] = True
+    state["diverse_policy_library_log_std_loc"] = diverse_policy_library_log_std_loc
     train(**state)

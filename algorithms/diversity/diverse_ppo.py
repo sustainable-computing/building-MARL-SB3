@@ -10,18 +10,21 @@ class PPODiversityHandler(BaseDiversity):
     def __init__(self,
                  diversity_weight: float = 0.0,
                  diverse_policies: List[str] = [],
+                 diverse_policy_library_log_std_loc: str = "",
                  *args,
                  **kwargs):
 
         self.diversity_weight = diversity_weight
         self.diverse_policies = diverse_policies
         self.diverse_policy_paths = diverse_policies
+        self.diverse_policy_library_log_std_loc = diverse_policy_library_log_std_loc
 
         self.load_diverse_policies()
 
     def load_diverse_policies(self):
         policies, policy_paths = load_policy_library(self.diverse_policies,
-                                                     PolicyTypeStrings.single_agent_ac)
+                                                     PolicyTypeStrings.single_agent_ac,
+                                                     init_log_std_path=self.diverse_policy_library_log_std_loc)
         self.diverse_policies = policies
         self.diverse_policy_paths = policy_paths
 

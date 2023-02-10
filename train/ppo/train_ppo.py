@@ -89,6 +89,7 @@ def get_model(env, args, config):
         model = MultiAgentPPO(MultiAgentACPolicy, env, verbose=1,
                               diverse_policy_library_loc=args["diverse_policy_library_loc"],
                               diversity_weight=args["diversity_weight"],
+                              diverse_policy_library_log_std_loc=args["diverse_policy_library_log_std_loc"],
                               n_steps=n_steps, batch_size=args["batch_size"],
                               device=args["device"],
                               policy_kwargs={"control_zones": env.control_zones,
@@ -124,6 +125,7 @@ def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
           energy_plus_loc: str = "/Applications/EnergyPlus-9-3-0/",
           diverse_training: bool = False,
           diverse_policy_library_loc: str = "data/diverse_policies/",
+          diverse_policy_library_log_std_loc: str = "",
           diversity_weight: float = 0.1):
 
     kwargs = locals()
@@ -152,9 +154,9 @@ def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
 
 if __name__ == "__main__":
     train(
-        building_env="denver",
-        building_config_loc="configs/buildingconfig/building_denver.yaml",
-        run_name="denvertest",
+        building_env="five_zone",
+        building_config_loc="configs/buildingconfig/building_five_zone.yaml",
+        run_name="fivezonediversitytest",
         log_dir="data/trainlogs/",
         train_year=1991,
         train_month=1,
@@ -169,6 +171,7 @@ if __name__ == "__main__":
         device="cpu",
         energy_plus_loc="/Applications/EnergyPlus-9-3-0/",
         diverse_training=True,
-        diverse_policy_library_loc="data/policy_libraries/policy_library_20220820",
-        diversity_weight=0.1
+        diverse_policy_library_loc="data/trainlogs/fivezonetest/2023-02-03_18-15-37/model/finalSplitPolicies",
+        diversity_weight=0.1,
+        diverse_policy_library_log_std_loc="data/trainlogs/fivezonetest/2023-02-03_18-15-37/model/finalSplitPolicies/policy_loc_log_std.yaml"
     )
