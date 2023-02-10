@@ -24,7 +24,8 @@ def load_policy_library(policy_library_path: str, policy_type: str,
                     action_size = layer.out_features
             with open(init_log_std_path, "r") as f:
                 init_log_std = yaml.safe_load(f)
-            init_log_std = init_log_std[policy_path]
+            init_log_std = init_log_std[os.path.basename(policy_path)]
+            policy = policy.state_dict()
         else:
             # Older type of policies
             keys = sorted(list(policy.keys()))
