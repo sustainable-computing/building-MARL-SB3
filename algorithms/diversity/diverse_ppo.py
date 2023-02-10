@@ -59,4 +59,4 @@ class PPODiversityHandler(BaseDiversity):
         if len(self.diverse_policies) > 1:
             diversity_losses /= len(self.diverse_policies)
 
-        return diversity_loss
+        return diversity_losses
