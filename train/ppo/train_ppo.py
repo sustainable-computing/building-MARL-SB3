@@ -37,11 +37,15 @@ def get_env(building_env, building_config_loc,
             log_dir, energy_plus_loc, args,
             logger):
     config = load_building_config(building_config_loc)
-    if building_env.value in ["denver", "sf"]:
+
+    if hasattr(building_env, "value"):
+        building_env = building_env.value
+
+    if building_env in ["denver", "sf"]:
         env = TypeABuilding(config, log_dir, energy_plus_loc, logger)
-    elif building_env.value == "dooe":
+    elif building_env == "dooe":
         env = DOOEBuilding(config, log_dir, energy_plus_loc, logger)
-    elif building_env.value == "five_zone":
+    elif building_env == "five_zone":
         env = FiveZoneBuilding(config, log_dir, energy_plus_loc, logger)
     else:
         raise ValueError("Building environment not supported")
@@ -79,27 +83,24 @@ def get_callbacks(log_dir, args):
     return callbacks
 
 
-def list_diverse_policies(diverse_policy_library_loc):
-    return sorted(os.listdir(diverse_policy_library_loc))
-
-
 def get_model(env, args, config):
     n_steps = config["timesteps_per_hour"] * 24 * args["num_train_days"]
     if args["diverse_training"]:
-        diverse_policies = list_diverse_policies(args["diverse_policy_library_loc"])
         model = MultiAgentPPO(MultiAgentACPolicy, env, verbose=1,
-                              diverse_policies=diverse_policies,
+                              diverse_policy_library_loc=args["diverse_policy_library_loc"],
                               diversity_weight=args["diversity_weight"],
                               n_steps=n_steps, batch_size=args["batch_size"],
-                              device=args["device"], policy_kwargs={"control_zones": env.control_zones,
-                                                                "device": args["device"]},
+                              device=args["device"],
+                              policy_kwargs={"control_zones": env.control_zones,
+                                             "device": args["device"]},
                               normalize_advantage=args["normalize_advantage"],
                               ent_coef=args["ent_coef"])
     else:
         model = MultiAgentPPO(MultiAgentACPolicy, env, verbose=1,
                               n_steps=n_steps, batch_size=args["batch_size"],
-                              device=args["device"], policy_kwargs={"control_zones": env.control_zones,
-                                                                    "device": args["device"]},
+                              device=args["device"],
+                              policy_kwargs={"control_zones": env.control_zones,
+                                             "device": args["device"]},
                               normalize_advantage=args["normalize_advantage"],
                               ent_coef=args["ent_coef"])
     return model
@@ -151,20 +152,23 @@ def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
 
 if __name__ == "__main__":
     train(
-        building_env="dooe",
-        building_config_loc="data/building_config/dooe.yaml",
-        run_name="dooe",
+        building_env="denver",
+        building_config_loc="configs/buildingconfig/building_denver.yaml",
+        run_name="denvertest",
         log_dir="data/trainlogs/",
         train_year=1991,
         train_month=1,
         train_day=1,
         num_train_days=30,
         model_save_freq=2880,
-        normalize_advantage=True,
+        normalize_advantage=False,
         ent_coef=0.01,
         num_episodes=500,
         batch_size=32,
         seed=1337,
         device="cpu",
         energy_plus_loc="/Applications/EnergyPlus-9-3-0/",
+        diverse_training=True,
+        diverse_policy_library_loc="data/policy_libraries/policy_library_20220820",
+        diversity_weight=0.1
     )

@@ -1,20 +1,15 @@
 from algorithms.diversity.diverse_base import BaseDiversity
-from policies.singleagentpolicy import SingleAgentACPolicy
+from policies import PolicyTypeStrings
+from policies.utils import load_policy_library
 
 import torch as th
 from typing import List
-import os
-import yaml
-import gym
 
 
 class PPODiversityHandler(BaseDiversity):
     def __init__(self,
                  diversity_weight: float = 0.0,
                  diverse_policies: List[str] = [],
-                 diverse_policies_init_log_std_loc: str = None,
-                 obs_space: gym.spaces.Box = None,
-                 action_space: gym.spaces.Box = None,
                  *args,
                  **kwargs):
 
@@ -22,45 +17,37 @@ class PPODiversityHandler(BaseDiversity):
         self.diverse_policies = diverse_policies
         self.diverse_policy_paths = diverse_policies
 
-        self.obs_space = obs_space
-        self.action_space = action_space
-
         self.load_diverse_policies()
 
     def load_diverse_policies(self):
-        assert os.path.isfile(self.diverse_policies_init_log_std_loc), \
-            f"File {self.diverse_policies_init_log_std_loc} does not exist"
-
-        with open(self.diverse_policies_init_log_std_loc, "r") as f:
-            policy_loc_log_std = yaml.load(f, Loader=yaml.FullLoader)
-
-        diverse_policies = []
-        for policy in self.diverse_policy_paths:
-            policy_name = os.path.basename(policy)
-            policy_obj = SingleAgentPolicy(observation_space=self.obs_space,
-                                           action_space=self.action_space,
-                                           log_std_init=policy_loc_log_std[policy_name])
-            policy_obj.load_state_dict(th.load(policy))
-            diverse_policies.append(policy_obj)
-
-        self.diverse_policies = diverse_policies
+        policies, policy_paths = load_policy_library(self.diverse_policies,
+                                                     PolicyTypeStrings.single_agent_ac)
+        self.diverse_policies = policies
+        self.diverse_policy_paths = policy_paths
 
     def calculate_diversity_loss(self,
                                  obs: th.Tensor,
                                  action: th.Tensor,
                                  returns: th.Tensor,
                                  log_prob: th.Tensor):
-        for other_policy in self.diverse_policies:
-            other_logprobs, other_state_values = other_policy.evaluate_actions(obs, action)
-            other_state_values = th.squeeze(other_state_values)
-            ratios = th.exp(th.abs(other_logprobs - log_prob))
-            ratios = th.max(ratios, 1.0 / ratios)
-            ratios = th.max(ratios, 100)
-            other_advantages = returns - other_state_values.detach()
+        diversity_losses = th.zeros(len(obs))
+        for i, zone in enumerate(list(obs.keys())):
+            zn_obs = obs[zone]
+            zn_actions = action[:, i]
+            zn_log_prob = log_prob[:, i]
+            zn_returns = returns[:, i]
+            for other_policy in self.diverse_policies:
+                with th.no_grad():
+                    other_state_values, other_logprobs, _ = other_policy.evaluate_actions(zn_obs, zn_actions.reshape(-1, 1))
+                other_state_values = th.squeeze(other_state_values)
+                ratios = th.exp(th.abs(other_logprobs.squeeze() - zn_log_prob))
+                ratios = th.max(ratios, 1.0 / ratios)
+                ratios = th.clamp(ratios, min=min(ratios).item(), max=100)
+                other_advantages = zn_returns - other_state_values.detach()
 
-            diversity_loss = ratios / th.abs(other_advantages)
-
-        if len(self.diverse_policies) > 0:
-            diversity_loss /= len(self.diverse_policies)
+                diversity_loss = ratios / th.abs(other_advantages)
+                diversity_losses[i] += diversity_loss.mean()
+        if len(self.diverse_policies) > 1:
+            diversity_losses /= len(self.diverse_policies)
 
         return diversity_loss

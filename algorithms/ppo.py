@@ -16,15 +16,15 @@ class MultiAgentPPO(PPO):
     def __init__(self,
                  policy: BasePolicy = None,
                  env: gym.Env = None,
-                 diverse_weight: float = 0.0,
-                 diverse_policies: list = [],
+                 diversity_weight: float = 0.0,
+                 diverse_policy_library_loc: str = "",
                  *args, **kwargs):
         env = MultiAgentDummyVecEnv([lambda: env])
         super().__init__(policy, env, *args, **kwargs)
 
-        if PPODiversityHandler.is_diverse_training(diverse_weight, diverse_policies):
+        if PPODiversityHandler.is_diverse_training(diversity_weight, diverse_policy_library_loc):
             self.diverse_training = True
-            self.diversity_handler = PPODiversityHandler(diverse_weight, diverse_policies)
+            self.diversity_handler = PPODiversityHandler(diversity_weight, diverse_policy_library_loc)
         else:
             self.diverse_training = False
 
