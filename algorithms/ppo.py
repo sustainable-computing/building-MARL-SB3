@@ -156,7 +156,8 @@ class MultiAgentPPO(PPO):
                                                                         rollout_data.actions,
                                                                         rollout_data.returns,
                                                                         log_prob)
-                    loss += self.diversity_handler.diversity_weight * diversity_loss
+                    diversity_loss = self.diversity_handler.diversity_weight * diversity_loss
+                    loss += diversity_loss
 
                 # Calculate approximate form of reverse KL Divergence for early stopping
                 # see issue #417: https://github.com/DLR-RM/stable-baselines3/issues/417
@@ -209,6 +210,11 @@ class MultiAgentPPO(PPO):
         self.logger.record("train/explained_variance", explained_var)
         if hasattr(self.policy, "log_std"):
             self.logger.record("train/std", th.exp(self.policy.log_std).mean().item())
+
+        if self.diverse_training:
+            self.logger.record("train/diversity_weight", self.diversity_handler.diversity_weight)
+            for i in range(len(diversity_loss)):
+                self.logger.record(f"train/diversity_loss_{i}", diversity_loss[i].item())
 
         self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
         self.logger.record("train/clip_range", clip_range)
