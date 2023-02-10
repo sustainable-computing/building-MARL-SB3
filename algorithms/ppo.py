@@ -27,7 +27,8 @@ class MultiAgentPPO(PPO):
             self.diverse_training = True
             self.diversity_handler = PPODiversityHandler(diversity_weight,
                                                          diverse_policy_library_loc,
-                                                         diverse_policy_library_log_std_loc)
+                                                         diverse_policy_library_log_std_loc,
+                                                         device=self.device)
         else:
             self.diverse_training = False
 

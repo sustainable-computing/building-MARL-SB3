@@ -19,12 +19,18 @@ class PPODiversityHandler(BaseDiversity):
         self.diverse_policy_paths = diverse_policies
         self.diverse_policy_library_log_std_loc = diverse_policy_library_log_std_loc
 
-        self.load_diverse_policies()
+        if "device" in kwargs:
+            self.device = kwargs["device"]
+        else:
+            self.device = "cpu"
 
-    def load_diverse_policies(self):
+        self.load_diverse_policies(self.device)
+
+    def load_diverse_policies(self, device="cpu"):
         policies, policy_paths = load_policy_library(self.diverse_policies,
                                                      PolicyTypeStrings.single_agent_ac,
-                                                     init_log_std_path=self.diverse_policy_library_log_std_loc)
+                                                     init_log_std_path=self.diverse_policy_library_log_std_loc,
+                                                     device=device)
         self.diverse_policies = policies
         self.diverse_policy_paths = policy_paths
 
@@ -33,7 +39,7 @@ class PPODiversityHandler(BaseDiversity):
                                  action: th.Tensor,
                                  returns: th.Tensor,
                                  log_prob: th.Tensor):
-        diversity_losses = th.zeros(len(obs))
+        diversity_losses = th.zeros(len(obs), device=self.device)
         for i, zone in enumerate(list(obs.keys())):
             zn_obs = obs[zone]
             zn_actions = action[:, i]

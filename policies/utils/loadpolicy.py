@@ -8,7 +8,7 @@ import yaml
 
 def load_policy_library(policy_library_path: str, policy_type: str,
                         init_log_std: float = np.log(0.1), init_log_std_path: str = "",
-                        eval_mode: bool = True):
+                        eval_mode: bool = True, device="cpu"):
     policy_paths = glob.glob(os.path.join(policy_library_path, "**.pt**"))
     if len(policy_paths) == 0:
         raise ValueError(f"No policies found in {policy_library_path}")
@@ -41,14 +41,14 @@ def load_policy_library(policy_library_path: str, policy_type: str,
                 elif "critic" in key:
                     policy[key.replace("critic", "critic_network")] = policy.pop(key)
 
-        policy = load_policy(policy, policy_type, obs_size, action_size, init_log_std)
+        policy = load_policy(policy, policy_type, obs_size, action_size, init_log_std, device)
         if eval_mode:
             policy.eval()
         policies.append(policy)
     return policies, policy_paths
 
 
-def load_policy(policy, policy_type, obs_size, action_size, init_log_std):
+def load_policy(policy, policy_type, obs_size, action_size, init_log_std, device):
     obs_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_size,))
     action_space = spaces.Box(low=0, high=1, shape=(action_size,))
     if hasattr(policy_type, "value"):
@@ -68,6 +68,7 @@ def load_policy(policy, policy_type, obs_size, action_size, init_log_std):
         raise ValueError(f"Invalid policy type {policy_type}")
 
     policy_obj.mlp_extractor.load_state_dict(policy)
+    policy_obj.to(device)
     return policy_obj
 
 
