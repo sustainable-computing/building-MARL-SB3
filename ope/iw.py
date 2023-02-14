@@ -72,6 +72,7 @@ class InverseProbabilityWeighting(OPEBase):
         return np.log(value / (1 - value))
 
     def calculate_action_probability(self, dist, bin, action_bins):
+        bin_l = self.inv_sigmoid(action_bins[bin])
         if bin == len(action_bins-1):
             bin_r = np.inf
         else:
