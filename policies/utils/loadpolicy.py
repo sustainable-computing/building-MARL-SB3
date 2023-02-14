@@ -14,7 +14,7 @@ def load_policy_library(policy_library_path: str, policy_type: str,
         raise ValueError(f"No policies found in {policy_library_path}")
     policies = []
     for policy_path in policy_paths:
-        policy = th.load(policy_path)
+        policy = th.load(policy_path, map_location=th.device(device))
         if "actor_network" in policy.keys():
             assert init_log_std_path != "",\
                 "init_log_std_path must be specified if using this policy type."

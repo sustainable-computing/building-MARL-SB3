@@ -49,9 +49,13 @@ class PPODiversityHandler(BaseDiversity):
                 with th.no_grad():
                     other_state_values, other_logprobs, _ = other_policy.evaluate_actions(zn_obs, zn_actions.reshape(-1, 1))
                 other_state_values = th.squeeze(other_state_values)
-                ratios = th.exp(th.abs(other_logprobs.squeeze() - zn_log_prob))
-                ratios = th.max(ratios, 1.0 / ratios)
-                ratios = th.clamp(ratios, min=min(ratios).item(), max=100)
+                log_ratios = th.abs(other_logprobs.squeeze() - zn_log_prob)
+                log_ratios = th.clamp(log_ratios, max=5)
+                ratios = th.exp(log_ratios)
+                # ratios = th.exp(th.abs(other_logprobs.squeeze() - zn_log_prob))
+                ratios = th.max(ratios, 1 / ratios)
+                # ratios = th.max(ratios, th.Tensor([100]))
+                ratios = th.clamp(ratios, max=100)
                 other_advantages = zn_returns - other_state_values.detach()
 
                 diversity_loss = ratios / th.abs(other_advantages)
