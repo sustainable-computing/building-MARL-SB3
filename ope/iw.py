@@ -154,7 +154,10 @@ class SelfNormalizedInverseProbabilityWeighting(OPEBase):
 
     def calculate_action_probability(self, dist, bin, action_bins):
         bin_l = self.inv_sigmoid(action_bins[bin])
-        bin_r = self.inv_sigmoid(action_bins[bin+1])
+        if bin == len(action_bins-1):
+            bin_r = np.inf
+        else:
+            bin_r = self.inv_sigmoid(action_bins[bin+1])
         if self.univariate_action:
             integral = dist.cdf(torch.Tensor([bin_r])) - dist.cdf(torch.Tensor([bin_l]))
         else:
