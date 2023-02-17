@@ -128,9 +128,5 @@ def get_policy_score(method: str,
 
 
 if __name__ == "__main__":
-    evaluate(methods=["snip"],
-             log_data_path="data/rule_based_log_data/denver/0_cleaned_log.csv",
-             policy_library_path="data/policy_libraries/policy_library_20220820",
-             policy_type="single_agent_ac",
-             num_days=15,
-             behavior_policy_path="data/rule_based_log_data/denver/action_probs_all_data.pkl")
+    # Run tests if necessary
+    evaluate()

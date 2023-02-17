@@ -2,6 +2,7 @@
 .vscode/
 
 test*
+*test.py
 config.py
 
 __pycache__

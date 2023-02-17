@@ -155,25 +155,5 @@ def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
 
 
 if __name__ == "__main__":
-    train(
-        building_env="five_zone",
-        building_config_loc="configs/buildingconfig/building_five_zone.yaml",
-        run_name="fivezonediversitytest",
-        log_dir="data/trainlogs/",
-        train_year=1991,
-        train_month=1,
-        train_day=1,
-        num_train_days=30,
-        model_save_freq=2880,
-        normalize_advantage=False,
-        ent_coef=0.01,
-        num_episodes=500,
-        batch_size=32,
-        seed=1337,
-        device="cpu",
-        energy_plus_loc="/Applications/EnergyPlus-9-3-0/",
-        diverse_training=True,
-        diverse_policy_library_loc="data/trainlogs/fivezonetest/2023-02-03_18-15-37/model/finalSplitPolicies",
-        diversity_weight=0.1,
-        diverse_policy_library_log_std_loc="data/trainlogs/fivezonetest/2023-02-03_18-15-37/model/finalSplitPolicies/policy_loc_log_std.yaml"
-    )
+    # Run tests here if necessary
+    train()
