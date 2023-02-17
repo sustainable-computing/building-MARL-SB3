@@ -8,6 +8,7 @@ from policies.utils.policy_extractor import save_zone_policies
 
 from datetime import datetime
 from stable_baselines3.common.callbacks import CheckpointCallback
+from callbacks.statevisitcallback import StateVisitCallback
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.logger import configure
 import os
@@ -78,8 +79,9 @@ def get_callbacks(log_dir, args):
     checkpoint_callback = create_checkpoint_callback(args["model_save_freq"],
                                                      log_dir, prefix=args["run_name"])
     # total_energy_callback = TotalEnergyCallback()
+    state_visit_callback = StateVisitCallback(log_dir)
     # callbacks = [checkpoint_callback, total_energy_callback]
-    callbacks = [checkpoint_callback]
+    callbacks = [checkpoint_callback, state_visit_callback]
     return callbacks
 
 
