@@ -44,18 +44,13 @@ def evaluate_policies(
                                                  init_policy_log_std, init_policy_log_std_path,
                                                  eval_mode=True)
     total_energy_consumptions = {}
-    flag = False
     for zone in zones:
-        if flag:
-            break
         zone_env, config = _get_zone_env(building_env, building_config_loc, zone,
                                          save_path, energy_plus_loc)
         zone_env.set_runperiod(num_days, start_year, start_month, start_day)
         zone_env.set_timestep(config["timesteps_per_hour"])
 
         for policy, policy_path in tqdm.tqdm(zip(policies, policy_paths), total=len(policies)):
-            if flag:
-                break
             for ep in range(1):
                 state = zone_env.reset()
                 state = state[zone]
