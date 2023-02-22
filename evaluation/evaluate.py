@@ -18,6 +18,7 @@ import yaml
 def evaluate_policies(
     building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
     building_config_loc: str = "configs/buildingconfig/building_denver.yaml",
+    zone: str = None,
     policy_library_path: str = "data/policy_libraries/policy_library_20220820",
     policy_type: str = "single_agent_ac",
     init_policy_log_std: float = np.log(0.1),
@@ -38,7 +39,10 @@ def evaluate_policies(
     _save_run_config(save_path, kwargs)
 
     building_config = load_building_config(building_config_loc)
-    zones = building_config["control_zones"]
+    if not zone:
+        zones = building_config["control_zones"]
+    else:
+        zones = [zone]
 
     policies, policy_paths = load_policy_library(policy_library_path, policy_type,
                                                  init_policy_log_std, init_policy_log_std_path,
@@ -58,7 +62,7 @@ def evaluate_policies(
                     # print(state["Perimeter_top_ZN_1 vav energy"])
                     with th.no_grad():
                         policy_action, _, _ = policy(state)
-                    state, _, _, _  = zone_env.step(policy_action)
+                    state, _, _, _ = zone_env.step(policy_action)
                     state = state[zone]
                 if zone not in total_energy_consumptions:
                     total_energy_consumptions[zone] = {}

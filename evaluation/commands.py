@@ -15,6 +15,7 @@ def evaluate(
     building_config_loc: str = typer.Option(
         "configs/buildingconfig/building_denver.yaml",
         help="The location of the building config file"),
+    zone: str = typer.Option(...),
     energy_plus_loc: str = typer.Option(...),
     policy_library_path: str = typer.Option(...),
     policy_type: str = typer.Option(...),
@@ -28,7 +29,7 @@ def evaluate(
     parallelize: bool = typer.Option(False),
     max_cpu_cores: int = typer.Option(1),
     seed: int = typer.Option(1337),
-):  
+):
     if hasattr(policy_type, "value"):
         policy_type = policy_type.value
     evaluate_policies(**locals())
