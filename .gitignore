@@ -1,7 +1,7 @@
 .history/
 .vscode/
 
-test*
+*test*
 *test.py
 config.py
 

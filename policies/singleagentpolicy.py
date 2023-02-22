@@ -112,6 +112,8 @@ class SingleAgentACPolicy(ActorCriticPolicy):
         return self.action_dist.proba_distribution(mean_actions, self.log_std)
 
     def forward(self, observations, deterministic: bool = False):
+        if isinstance(observations, list):
+            observations = th.Tensor(observations)
         latent_pi, vf = self.mlp_extractor(observations)
         distribution = self._get_action_dist_from_latent(latent_pi)
         actions = distribution.get_actions(deterministic=deterministic)

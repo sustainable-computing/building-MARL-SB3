@@ -124,7 +124,8 @@ class DOOEBuilding(Building):
         return zonewise_state, rewards, done, info
 
     def reset(self):
-        self.logger.record("total_energy_consumption", self.total_energy_consumption)
+        if self.logger:
+            self.logger.record("total_energy_consumption", self.total_energy_consumption)
         state = self.model.reset()
         zonewise_state = self.get_state_dict(state)
         self.total_energy_consumption = state["total hvac"]
