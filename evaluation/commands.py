@@ -27,6 +27,7 @@ def evaluate(
     parallelize: bool = typer.Option(False),
     max_cpu_cores: int = typer.Option(1),
     seed: int = typer.Option(1337),
-):
-    policy_type = policy_type.value
+):  
+    if hasattr(building_env, "value"):
+        policy_type = policy_type.value
     evaluate_policies(**locals())
