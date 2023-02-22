@@ -15,6 +15,7 @@ def evaluate(
     building_config_loc: str = typer.Option(
         "configs/buildingconfig/building_denver.yaml",
         help="The location of the building config file"),
+    energy_plus_loc: str = typer.Option(...),
     policy_library_path: str = typer.Option(...),
     policy_type: str = typer.Option(...),
     init_policy_log_std: float = typer.Option(np.log(0.1)),
