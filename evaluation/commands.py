@@ -28,6 +28,6 @@ def evaluate(
     max_cpu_cores: int = typer.Option(1),
     seed: int = typer.Option(1337),
 ):  
-    if hasattr(building_env, "value"):
+    if hasattr(policy_type, "value"):
         policy_type = policy_type.value
     evaluate_policies(**locals())
