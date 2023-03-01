@@ -15,7 +15,7 @@ def evaluate(
     building_config_loc: str = typer.Option(
         "configs/buildingconfig/building_denver.yaml",
         help="The location of the building config file"),
-    zone: str = typer.Option(...),
+    zone: str = typer.Option(None),
     energy_plus_loc: str = typer.Option(...),
     policy_library_path: str = typer.Option(...),
     policy_type: str = typer.Option(...),

@@ -116,11 +116,13 @@ class DOOEBuilding(Building):
         self.total_energy_consumption += state["total hvac"]
         self.current_obs_timestep = state["timestep"]
         vav_energies = {zone: state[f"{zone} vav heating energy"] +
-                                  state[f"{zone} vav cooling energy"]
+                                state[f"{zone} vav cooling energy"]
                         for zone in self.control_zones}
         rewards = np.array([-vav_energies[zone] for zone in self.control_zones])
         done = self.model.is_terminate()
-        info = {}
+        info = {
+            "cobs_state": state
+        }
         return zonewise_state, rewards, done, info
 
     def reset(self):

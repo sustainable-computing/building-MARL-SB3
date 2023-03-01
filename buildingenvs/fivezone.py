@@ -116,7 +116,9 @@ class FiveZoneBuilding(Building):
         self.current_obs_timestep = state["timestep"]
         rewards = np.array([-state[f"{zone} vav energy"] for zone in self.control_zones])
         done = self.model.is_terminate()
-        info = {}
+        info = {
+            "cobs_state": state
+        }
         return zonewise_state, rewards, done, info
 
     def reset(self):

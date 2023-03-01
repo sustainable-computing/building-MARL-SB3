@@ -7,7 +7,6 @@ from policies.utils import load_policy_library
 from datetime import datetime
 import numpy as np
 import os
-import pandas as pd
 import pickle
 from stable_baselines3.common.utils import set_random_seed
 import tqdm
@@ -55,19 +54,17 @@ def evaluate_policies(
         zone_env.set_timestep(config["timesteps_per_hour"])
 
         for policy, policy_path in tqdm.tqdm(zip(policies, policy_paths), total=len(policies)):
-            for ep in range(1):
-                state = zone_env.reset()
+            state = zone_env.reset()
+            state = state[zone]
+            while not zone_env.is_terminate():
+                with th.no_grad():
+                    policy_action, _, _ = policy(state)
+                state, _, _, _ = zone_env.step(policy_action)
                 state = state[zone]
-                while not zone_env.is_terminate():
-                    # print(state["Perimeter_top_ZN_1 vav energy"])
-                    with th.no_grad():
-                        policy_action, _, _ = policy(state)
-                    state, _, _, _ = zone_env.step(policy_action)
-                    state = state[zone]
-                if zone not in total_energy_consumptions:
-                    total_energy_consumptions[zone] = {}
-                total_energy_consumptions[zone][policy_path] = zone_env.total_energy_consumption
-    _save_energy_consumptions(save_path, total_energy_consumptions)   
+            if zone not in total_energy_consumptions:
+                total_energy_consumptions[zone] = {}
+            total_energy_consumptions[zone][policy_path] = zone_env.total_energy_consumption
+    _save_energy_consumptions(save_path, total_energy_consumptions)
 
 
 def load_building_config(building_config_loc):
@@ -80,7 +77,7 @@ def _save_energy_consumptions(save_path, total_energy_consumptions):
     with open(os.path.join(save_path, "raw_energy_consumptions.pkl"), "wb+") as f:
         pickle.dump(total_energy_consumptions, f)
 
-    with open(os.path.join(save_path, "evaluation_report.csv", "w+")) as f:
+    with open(os.path.join(save_path, "evaluation_report.csv"), "w+") as f:
         for zone in total_energy_consumptions:
             for policy in total_energy_consumptions[zone]:
                 f.write(f"{zone},{policy},{total_energy_consumptions[zone][policy]}\n")
