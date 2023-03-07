@@ -1,4 +1,4 @@
-from ope.opebase import OPEBase
+from evaluation.offline.opebase import OPEBase
 
 import pandas as pd
 import numpy as np

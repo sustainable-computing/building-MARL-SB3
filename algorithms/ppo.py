@@ -10,6 +10,7 @@ from stable_baselines3.common.utils import explained_variance, get_schedule_fn
 from stable_baselines3.common.policies import BasePolicy
 import torch as th
 from torch.nn import functional as F
+import wandb
 
 
 class MultiAgentPPO(PPO):
@@ -192,31 +193,49 @@ class MultiAgentPPO(PPO):
 
         # Logs
         for i in range(len(all_entropy_losses)):
-            self.logger.record(f"train/entropy_loss_{i}", np.mean(all_entropy_losses[i]))
+            # self.logger.record(f"train/entropy_loss_{i}", np.mean(all_entropy_losses[i]))
+            self.log_data(f"train/entropy_loss_{i}", np.mean(all_entropy_losses[i]))
         # self.logger.record("train/entropy_loss", np.mean(entropy_losses))
         for i in range(len(all_pg_losses)):
-            self.logger.record(f"train/policy_gradient_loss_{i}", np.mean(all_pg_losses[i]))
+            # self.logger.record(f"train/policy_gradient_loss_{i}", np.mean(all_pg_losses[i]))
+            self.log_data(f"train/policy_gradient_loss_{i}", np.mean(all_pg_losses[i]))
         # self.logger.record("train/policy_gradient_loss", np.mean(pg_losses))
         for i in range(len(all_value_losses)):
-            self.logger.record(f"train/value_loss_{i}", np.mean(all_value_losses[i]))
+            # self.logger.record(f"train/value_loss_{i}", np.mean(all_value_losses[i]))
+            self.log_data(f"train/value_loss_{i}", np.mean(all_value_losses[i]))
         # self.logger.record("train/value_loss", np.mean(value_losses))
         for i in range(len(approx_kl_divs)):
-            self.logger.record(f"train/approx_kl_{i}", np.mean(approx_kl_divs[i]))
+            # self.logger.record(f"train/approx_kl_{i}", np.mean(approx_kl_divs[i]))
+            self.log_data(f"train/approx_kl_{i}", np.mean(approx_kl_divs[i]))
         # self.logger.record("train/approx_kl", np.mean(approx_kl_divs))
-        self.logger.record("train/clip_fraction", np.mean(clip_fractions))
+        # self.logger.record("train/clip_fraction", np.mean(clip_fractions))
+        self.log_data("train/clip_fraction", np.mean(clip_fractions))
         for i in range(len(loss)):
-            self.logger.record(f"train/loss_{i}", loss[i].item())
+            # self.logger.record(f"train/loss_{i}", loss[i].item())
+            self.log_data(f"train/loss_{i}", loss[i].item())
         # self.logger.record("train/loss", loss.item())
-        self.logger.record("train/explained_variance", explained_var)
+        # self.logger.record("train/explained_variance", explained_var)
+        self.log_data("train/explained_variance", explained_var)
         if hasattr(self.policy, "log_std"):
-            self.logger.record("train/std", th.exp(self.policy.log_std).mean().item())
+            # self.logger.record("train/std", th.exp(self.policy.log_std).mean().item())
+            self.log_data("train/std", th.exp(self.policy.log_std).mean().item())
 
         if self.diverse_training:
-            self.logger.record("train/diversity_weight", self.diversity_handler.diversity_weight)
+            # self.logger.record("train/diversity_weight", self.diversity_handler.diversity_weight)
+            self.log_data("train/diversity_weight", self.diversity_handler.diversity_weight)
             for i in range(len(diversity_loss)):
-                self.logger.record(f"train/diversity_loss_{i}", diversity_loss[i].item())
+                # self.logger.record(f"train/diversity_loss_{i}", diversity_loss[i].item())
+                self.log_data(f"train/diversity_loss_{i}", diversity_loss[i].item())
 
-        self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
-        self.logger.record("train/clip_range", clip_range)
+        # self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
+        self.log_data("train/n_updates", self._n_updates)
+        # self.logger.record("train/clip_range", clip_range)
+        self.log_data("train/clip_range", clip_range)
         if self.clip_range_vf is not None:
-            self.logger.record("train/clip_range_vf", clip_range_vf)
+            # self.logger.record("train/clip_range_vf", clip_range_vf)
+            self.log_data("train/clip_range_vf", clip_range_vf)
+
+    def log_data(self, name, value):
+        self.logger.record(f"{name}", value)
+        if wandb.run is not None:
+            wandb.log({f"{name}": value})

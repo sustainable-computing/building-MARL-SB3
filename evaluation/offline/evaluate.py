@@ -1,8 +1,8 @@
-from ope import OPEMethodStrings
-from ope.iw import InverseProbabilityWeighting
-from ope.iw import SelfNormalizedInverseProbabilityWeighting
-from ope.zcp import SNIP
-from ope.zcp import GaussianKernel
+from evaluation.offline import OPEMethodStrings
+from evaluation.offline.iw import InverseProbabilityWeighting
+from evaluation.offline.iw import SelfNormalizedInverseProbabilityWeighting
+from evaluation.offline.zcp import SNIP
+from evaluation.offline.zcp import GaussianKernel
 from policies.utils import load_policy_library
 
 from datetime import datetime

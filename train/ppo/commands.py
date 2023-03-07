@@ -30,7 +30,10 @@ def _main(building_env: BuildingEnvStrings = typer.Option(
           seed: int = typer.Option(1337, help="The seed for the environment"),
           device: str = typer.Option("cpu", help="The device to train on"),
           energy_plus_loc: str = typer.Option("/Applications/EnergyPlus-9-3-0/",
-                                              help="The location of the energyplus executable")):
+                                              help="The location of the energyplus executable"),
+          use_wandb: bool = typer.Option(False, help="Whether to use wandb for logging metics"),
+          wandb_project_name: str = typer.Option("ppo-train",
+                                                 help="The name of the wandb project")):
     state["building_env"] = building_env
     state["building_config_loc"] = building_config_loc
     state["run_name"] = run_name
@@ -47,6 +50,8 @@ def _main(building_env: BuildingEnvStrings = typer.Option(
     state["seed"] = seed
     state["device"] = device
     state["energy_plus_loc"] = energy_plus_loc
+    state["use_wandb"] = use_wandb
+    state["wandb_project_name"] = wandb_project_name
 
 
 @app.command("optimal")

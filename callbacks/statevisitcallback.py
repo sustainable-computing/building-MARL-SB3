@@ -1,6 +1,7 @@
 import numpy as np
 import pickle as pkl
 from stable_baselines3.common.callbacks import BaseCallback
+import wandb
 
 
 class StateVisitCallback(BaseCallback):
@@ -23,3 +24,6 @@ class StateVisitCallback(BaseCallback):
     def _on_training_end(self) -> None:
         with open(f"{self.log_dir}/state_visits.pkl", "wb") as f:
             pkl.dump(self.state_visits, f)
+
+        if wandb.run is not None:
+            wandb.save(f"{self.log_dir}/state_visits.pkl")

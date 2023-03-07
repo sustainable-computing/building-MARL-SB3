@@ -3,15 +3,17 @@ from buildingenvs import BuildingEnvStrings
 from buildingenvs import TypeABuilding
 from buildingenvs import DOOEBuilding
 from buildingenvs import FiveZoneBuilding
+from callbacks.statevisitcallback import StateVisitCallback
 from policies.multiagentpolicy import MultiAgentACPolicy
 from policies.utils.policy_extractor import save_zone_policies
 
 from datetime import datetime
 from stable_baselines3.common.callbacks import CheckpointCallback
-from callbacks.statevisitcallback import StateVisitCallback
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.logger import configure
 import os
+import wandb
+from wandb.integration.sb3 import WandbCallback
 import yaml
 
 
@@ -109,6 +111,18 @@ def get_model(env, args, config):
     return model
 
 
+def init_wandb(project_name, config):
+    run = wandb.init(
+        project=project_name,
+        config=config,
+        sync_tensorboard=True,
+        monitor_gym=False,
+        save_code=True
+    )
+    print("WANDB URL: ", run.get_url())
+    return run
+
+
 def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
           building_config_loc: str = "configs/buildingconfig/building_denver.yaml",
           run_name: str = "denvertest",
@@ -128,7 +142,9 @@ def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
           diverse_training: bool = False,
           diverse_policy_library_loc: str = "data/diverse_policies/",
           diverse_policy_library_log_std_loc: str = "",
-          diversity_weight: float = 0.1):
+          diversity_weight: float = 0.1,
+          use_wandb: bool = False,
+          wandb_project_name: str = "ppo-train"):
 
     kwargs = locals()
     set_random_seed(kwargs["seed"], using_cuda="cuda" in kwargs["device"])
@@ -144,6 +160,13 @@ def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
 
     callbacks = get_callbacks(model_dir, kwargs)
 
+    if use_wandb:
+        kwargs["building_config"] = config
+        run = init_wandb(kwargs["wandb_project_name"], kwargs)
+        callbacks.append(WandbCallback(verbose=2, model_save_freq=kwargs["model_save_freq"],
+                                       model_save_path=model_dir,
+                                       gradient_save_freq=kwargs["model_save_freq"]))
+
     model = get_model(env, kwargs, config)
     model.set_logger(logger)
 
@@ -152,8 +175,9 @@ def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
                 tb_log_name=kwargs["run_name"])
     model.save(os.path.join(model_dir, "final_model"))
     save_zone_policies(model.policy, save_dir=os.path.join(model_dir, "finalSplitPolicies"))
+    if use_wandb:
+        run.finish()
 
 
 if __name__ == "__main__":
-    # Run tests here if necessary
     train()

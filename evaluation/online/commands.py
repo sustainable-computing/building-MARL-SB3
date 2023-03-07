@@ -2,14 +2,12 @@ import typer
 import numpy as np
 
 from buildingenvs import BuildingEnvStrings
-from evaluation.online.evaluate import evaluate_policies
-from evaluation.offline.commands import app as ope_app
+from evaluation.evaluate import evaluate_policies
 
 app = typer.Typer()
-app.add_typer(ope_app, name="offline")
 
 
-@app.command("online")
+@app.command("evaluate-policies")
 def evaluate(
     building_env: BuildingEnvStrings = typer.Option(
                 BuildingEnvStrings.denver.value,

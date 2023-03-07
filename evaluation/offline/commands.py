@@ -1,6 +1,6 @@
 import numpy as np
-from ope.evaluate import evaluate
-from ope import OPEMethodStrings
+from evaluation.offline.evaluate import evaluate
+from evaluation.offline import OPEMethodStrings
 from policies import PolicyTypeStrings
 
 import typer

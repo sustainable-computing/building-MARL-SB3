@@ -25,3 +25,5 @@ train_test.py
 
 scripts/
 *todo*
+
+wandb/
