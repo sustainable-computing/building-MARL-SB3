@@ -25,6 +25,7 @@ def _main(building_env: BuildingEnvStrings = typer.Option(
           normalize_advantage: bool =
           typer.Option(False, help="Whether to normalize the calculated advantage"),
           ent_coef: float = typer.Option(0.01, help="The entropy coefficient"),
+          learning_rate: float = typer.Option(0.0003, help="The learning rate"),
           num_episodes: int = typer.Option(500, help="The number of episodes to train for"),
           batch_size: int = typer.Option(32, help="The batch size"),
           seed: int = typer.Option(1337, help="The seed for the environment"),
@@ -45,6 +46,7 @@ def _main(building_env: BuildingEnvStrings = typer.Option(
     state["model_save_freq"] = model_save_freq
     state["normalize_advantage"] = normalize_advantage
     state["ent_coef"] = ent_coef
+    state["learning_rate"] = learning_rate
     state["num_episodes"] = num_episodes
     state["batch_size"] = batch_size
     state["seed"] = seed

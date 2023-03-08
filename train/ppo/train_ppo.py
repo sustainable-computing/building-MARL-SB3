@@ -99,7 +99,8 @@ def get_model(env, args, config):
                               policy_kwargs={"control_zones": env.control_zones,
                                              "device": args["device"]},
                               normalize_advantage=args["normalize_advantage"],
-                              ent_coef=args["ent_coef"])
+                              ent_coef=args["ent_coef"],
+                              learning_rate=args["learning_rate"])
     else:
         model = MultiAgentPPO(MultiAgentACPolicy, env, verbose=1,
                               n_steps=n_steps, batch_size=args["batch_size"],
@@ -107,7 +108,8 @@ def get_model(env, args, config):
                               policy_kwargs={"control_zones": env.control_zones,
                                              "device": args["device"]},
                               normalize_advantage=args["normalize_advantage"],
-                              ent_coef=args["ent_coef"])
+                              ent_coef=args["ent_coef"],
+                              learning_rate=args["learning_rate"])
     return model
 
 
@@ -134,6 +136,7 @@ def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
           model_save_freq: int = 2880,
           normalize_advantage: bool = False,
           ent_coef: float = 0.01,
+          learning_rate: float = 0.0003,
           num_episodes: int = 500,
           batch_size: int = 32,
           seed: int = 1337,
