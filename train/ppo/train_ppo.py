@@ -179,6 +179,10 @@ def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
     model.save(os.path.join(model_dir, "final_model"))
     save_zone_policies(model.policy, save_dir=os.path.join(model_dir, "finalSplitPolicies"))
     if use_wandb:
+        artifact = wandb.Artifact("trained_model", type="model")
+        artifact.add_dir(os.path.join(model_dir, "finalSplitPolicies"), name="finalSplitPolicies")
+        artifact.add_file(os.path.join(model_dir, "final_model.zip"), name="final_model")
+        run.log_artifact(artifact)
         run.finish()
 
 
