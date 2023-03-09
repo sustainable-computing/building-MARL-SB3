@@ -34,7 +34,9 @@ def _main(building_env: BuildingEnvStrings = typer.Option(
                                               help="The location of the energyplus executable"),
           use_wandb: bool = typer.Option(False, help="Whether to use wandb for logging metics"),
           wandb_project_name: str = typer.Option("ppo-train",
-                                                 help="The name of the wandb project")):
+                                                 help="The name of the wandb project"),
+          wandb_run_name: str = typer.Option("",
+                                             help="The name of the wandb run")):
     state["building_env"] = building_env
     state["building_config_loc"] = building_config_loc
     state["run_name"] = run_name
@@ -54,6 +56,7 @@ def _main(building_env: BuildingEnvStrings = typer.Option(
     state["energy_plus_loc"] = energy_plus_loc
     state["use_wandb"] = use_wandb
     state["wandb_project_name"] = wandb_project_name
+    state["wandb_run_name"] = wandb_run_name
 
 
 @app.command("optimal")

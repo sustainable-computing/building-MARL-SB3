@@ -114,12 +114,17 @@ def get_model(env, args, config):
 
 
 def init_wandb(project_name, config):
+    if config["wandb_run_name"] == "":
+        name = None
+    else:
+        name = config["wandb_run_name"]
     run = wandb.init(
         project=project_name,
         config=config,
         sync_tensorboard=True,
         monitor_gym=False,
-        save_code=True
+        save_code=True,
+        name=name
     )
     print("WANDB URL: ", run.get_url())
     return run
@@ -147,7 +152,8 @@ def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
           diverse_policy_library_log_std_loc: str = "",
           diversity_weight: float = 0.1,
           use_wandb: bool = False,
-          wandb_project_name: str = "ppo-train"):
+          wandb_project_name: str = "ppo-train",
+          wandb_run_name: str = ""):
 
     kwargs = locals()
     set_random_seed(kwargs["seed"], using_cuda="cuda" in kwargs["device"])
