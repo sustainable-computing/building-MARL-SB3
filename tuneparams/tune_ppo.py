@@ -31,7 +31,8 @@ def tune_ppo_optimal_command(
     start_year: int = typer.Option(1991),
     log_dir: str = typer.Option("data/hyperparam_sweeps/"),
     wandb_project_name: str = typer.Option(""),
-    seed: int = typer.Option(1337)
+    seed: int = typer.Option(1337),
+    device: str = typer.Option("cpu"),
 ):
 
     sweep_config = load_config(sweep_config_loc)
