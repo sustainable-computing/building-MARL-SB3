@@ -2,7 +2,7 @@ import typer
 import numpy as np
 
 from buildingenvs import BuildingEnvStrings
-from evaluation.evaluate import evaluate_policies
+from evaluation.online.evaluate import evaluate_policies
 
 app = typer.Typer()
 

@@ -1,0 +1,11 @@
+method: grid
+metric:
+  name: final_energy_consumption
+  goal: minimize
+parameters:
+  normalize_advantage:
+    values: [True, False]
+  ent_coef:
+    values: [0, 0.0001, 0.01, 0.1]
+  learning_rate:
+    values: [1e-5, 1e-4, 1e-3, 1e-2]

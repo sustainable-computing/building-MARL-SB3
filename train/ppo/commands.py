@@ -36,7 +36,9 @@ def _main(building_env: BuildingEnvStrings = typer.Option(
           wandb_project_name: str = typer.Option("ppo-train",
                                                  help="The name of the wandb project"),
           wandb_run_name: str = typer.Option("",
-                                             help="The name of the wandb run")):
+                                             help="The name of the wandb run"),
+          torch_compile: bool = typer.Option(False, help="Whether to use  torch.compile")):
+
     state["building_env"] = building_env
     state["building_config_loc"] = building_config_loc
     state["run_name"] = run_name
@@ -57,6 +59,7 @@ def _main(building_env: BuildingEnvStrings = typer.Option(
     state["use_wandb"] = use_wandb
     state["wandb_project_name"] = wandb_project_name
     state["wandb_run_name"] = wandb_run_name
+    state["torch_compile"] = torch_compile
 
 
 @app.command("optimal")

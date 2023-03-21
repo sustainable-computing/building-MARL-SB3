@@ -11,6 +11,7 @@ from datetime import datetime
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.logger import configure
+import torch as th
 import os
 import wandb
 from wandb.integration.sb3 import WandbCallback
@@ -20,7 +21,10 @@ import yaml
 def get_log_dirs(log_dir, run_name):
     current_dt = datetime.now()
     dt_str = current_dt.strftime("%Y-%m-%d_%H-%M-%S")
-    log_dir = os.path.join(log_dir, run_name, dt_str)
+    if run_name != "":
+        log_dir = os.path.join(log_dir, run_name, dt_str)
+    else:
+        log_dir = os.path.join(log_dir, dt_str)
     model_save_dir = os.path.join(log_dir, "model")
     return log_dir, model_save_dir
 
@@ -132,7 +136,7 @@ def init_wandb(project_name, config):
 
 def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
           building_config_loc: str = "configs/buildingconfig/building_denver.yaml",
-          run_name: str = "denvertest",
+          run_name: str = "",
           log_dir: str = "data/trainlogs/",
           train_year: int = 1991,
           train_month: int = 1,
@@ -153,7 +157,9 @@ def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
           diversity_weight: float = 0.1,
           use_wandb: bool = False,
           wandb_project_name: str = "ppo-train",
-          wandb_run_name: str = ""):
+          wandb_run_name: str = "",
+          torch_compile: bool = False,
+          **kwargs):
 
     kwargs = locals()
     set_random_seed(kwargs["seed"], using_cuda="cuda" in kwargs["device"])
@@ -179,6 +185,9 @@ def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
     model = get_model(env, kwargs, config)
     model.set_logger(logger)
 
+    if torch_compile:
+        model = th.compile(model)
+
     total_timesteps = kwargs["num_episodes"] * config["timesteps_per_hour"] * 24 * kwargs["num_train_days"]
     model.learn(total_timesteps=total_timesteps, progress_bar=True, callback=callbacks,
                 tb_log_name=kwargs["run_name"])
@@ -190,6 +199,9 @@ def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
         artifact.add_file(os.path.join(model_dir, "final_model.zip"), name="final_model")
         run.log_artifact(artifact)
         run.finish()
+        wandb.finish()
+
+    return log_dir, model
 
 
 if __name__ == "__main__":

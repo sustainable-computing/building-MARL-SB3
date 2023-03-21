@@ -17,6 +17,7 @@ data/rule_based_log_data/
 data/policy_evaluation/
 data/policy_librar*
 data/*logs
+data/hyperparam_sweeps/
 
 notebooks/
 
