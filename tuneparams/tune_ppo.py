@@ -12,7 +12,7 @@ import wandb
 app = typer.Typer()
 
 
-@app.command("tune-ppo-optimal")
+@app.command("ppo-optimal")
 def tune_ppo_optimal_command(
     building_env: BuildingEnvStrings = typer.Option(
                 BuildingEnvStrings.denver.value,
