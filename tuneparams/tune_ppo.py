@@ -23,7 +23,7 @@ def tune_ppo_optimal_command(
     sweep_config_loc: str = typer.Option(
         "configs/sweepconfigs/ppo_sweep_0.yaml",
         help="The location of the sweep config file"),
-    sweep_name: str = typer.Option("ppo_sweep_0"),
+    run_name: str = typer.Option("ppo_run_0"),
     sweep_id: str = typer.Option(""),
     energy_plus_loc: str = typer.Option(...),
     num_days: int = typer.Option(...),
@@ -37,7 +37,7 @@ def tune_ppo_optimal_command(
 ):
 
     sweep_config = load_config(sweep_config_loc)
-    log_dir = create_log_dir(log_dir, sweep_name)
+    log_dir = create_log_dir(log_dir, run_name)
     save_config(sweep_config, os.path.join(log_dir, "sweep_config.yaml"))
     default_args = locals()
 
