@@ -6,6 +6,8 @@ from buildingenvs import FiveZoneBuilding
 from callbacks.statevisitcallback import StateVisitCallback
 from policies.multiagentpolicy import MultiAgentACPolicy
 from policies.utils.policy_extractor import save_zone_policies
+from utils.logs import create_log_dir
+from utils.configs import load_config, save_config
 
 from datetime import datetime
 from stable_baselines3.common.callbacks import CheckpointCallback
@@ -19,13 +21,9 @@ import yaml
 
 
 def get_log_dirs(log_dir, run_name):
-    current_dt = datetime.now()
-    dt_str = current_dt.strftime("%Y-%m-%d_%H-%M-%S")
-    if run_name != "":
-        log_dir = os.path.join(log_dir, run_name, dt_str)
-    else:
-        log_dir = os.path.join(log_dir, dt_str)
-    model_save_dir = os.path.join(log_dir, "model")
+    log_dir = create_log_dir(log_dir, run_name)
+    model_save_dir = create_log_dir(log_dir, "model")
+
     return log_dir, model_save_dir
 
 
@@ -35,9 +33,7 @@ def get_logger(log_dir):
 
 
 def load_building_config(building_config_loc):
-    with open(building_config_loc, "r") as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
-    return config
+    return load_config(building_config_loc)
 
 
 def get_env(building_env, building_config_loc,
@@ -65,10 +61,9 @@ def get_env(building_env, building_config_loc,
 def save_configs(log_dir, args, building_config):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
-    with open(os.path.join(log_dir, "run_config.yaml"), "w") as f:
-        yaml.dump(args, f)
-    with open(os.path.join(log_dir, "building_config.yaml"), "w") as f:
-        yaml.dump(building_config, f)
+
+    save_config(args, os.path.join(log_dir, "run_config.yaml"))
+    save_config(building_config, os.path.join(log_dir, "building_config.yaml"))
 
 
 def create_checkpoint_callback(save_freq, log_dir, prefix="b_denver"):
