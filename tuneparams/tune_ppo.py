@@ -37,8 +37,8 @@ def tune_ppo_optimal_command(
 ):
 
     sweep_config = load_config(sweep_config_loc)
-    log_dir = create_log_dir(log_dir, run_name, use_dt_str=False)
     save_config(sweep_config, os.path.join(log_dir, "sweep_config.yaml"))
+    log_dir = create_log_dir(log_dir, run_name, use_dt_str=False)
     default_args = locals()
 
     wandb.agent(sweep_id, construct_train_function(default_args),
