@@ -37,7 +37,7 @@ def tune_ppo_optimal_command(
 ):
 
     sweep_config = load_config(sweep_config_loc)
-    log_dir = create_log_dir(log_dir, run_name)
+    log_dir = create_log_dir(log_dir, run_name, use_dt_str=False)
     save_config(sweep_config, os.path.join(log_dir, "sweep_config.yaml"))
     default_args = locals()
 
