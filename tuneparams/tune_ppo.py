@@ -47,8 +47,8 @@ def tune_ppo_optimal_command(
 
 def construct_train_function(default_args):
     def train_function():
-        config = {**default_args, **wandb.config}
         wandb.init()
+        config = {**default_args, **wandb.config}
         wandb.alert(title="Sweep Updates",
                     text=f"Agent training started for sweep {config['sweep_id']}")
         config["use_wandb"] = False
