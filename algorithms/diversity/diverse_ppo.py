@@ -57,7 +57,7 @@ class PPODiversityHandler(BaseDiversity):
                 # ratios = th.max(ratios, th.Tensor([100]))
                 ratios = th.clamp(ratios, max=100)
                 other_advantages = zn_returns - other_state_values.detach()
-
+                other_advantages = th.clamp(other_advantages, min=0.1)
                 diversity_loss = ratios / th.abs(other_advantages)
                 diversity_losses[i] += diversity_loss.mean()
         if len(self.diverse_policies) > 1:
