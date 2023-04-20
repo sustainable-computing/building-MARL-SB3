@@ -72,6 +72,10 @@ class FiveZoneBuilding(Building):
             ("Air System Electric Energy", self.airloops[zone]): f"{zone} vav energy"
             for zone in self.control_zones
             })
+        additional_states.update({
+            ("Zone Air Terminal Minimum Air Flow Fraction", f"{zone} VAV Box Component"):
+                f"{zone} position" for zone in self.available_zones
+        })
         additional_states[('Site Outdoor Air Drybulb Temperature', 'Environment')] = \
             "outdoor temperature"
 
@@ -115,7 +119,8 @@ class FiveZoneBuilding(Building):
         zonewise_state = self.get_state_dict(state)
         self.total_energy_consumption += state["total hvac"]
         self.current_obs_timestep = state["timestep"]
-        rewards = np.array([-state[f"{zone} vav energy"] for zone in self.control_zones])
+        # rewards = np.array([-state[f"{zone} vav energy"] for zone in self.control_zones])
+        rewards = np.array([-state["total hvac"] for zone in self.control_zones])
         done = self.model.is_terminate()
         info = {
             "cobs_state": state

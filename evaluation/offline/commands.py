@@ -22,8 +22,8 @@ def list_policy_types():
         print(policy_type.value)
 
 
-@app.command("evaluate")
-def evaluate_ope(methods: List[OPEMethodStrings] = typer.Argument(
+@app.command("evaluate-policies")
+def evaluate_ope(methods: List[OPEMethodStrings] = typer.Option(
                     ..., help="OPE methods to evaluate"),
                  log_data_path: str = typer.Option(...),
                  policy_library_path: str = typer.Option(...),

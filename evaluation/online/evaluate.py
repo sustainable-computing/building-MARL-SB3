@@ -7,6 +7,7 @@ from policies.utils import load_policy_library
 from datetime import datetime
 import numpy as np
 import os
+import pandas as pd
 import pickle
 from stable_baselines3.common.utils import set_random_seed
 import tqdm
@@ -67,6 +68,63 @@ def evaluate_policies(
     _save_energy_consumptions(save_path, total_energy_consumptions)
 
 
+def evaluate_rule_based(
+    building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
+    building_config_loc: str = "configs/buildingconfig/building_denver.yaml",
+    zone: str = None,
+    num_days: int = 365,
+    start_day: int = 1,
+    start_month: int = 1,
+    start_year: int = 1995,
+    save_path: str = "data/policy_evaluation/brute_force/",
+    energy_plus_loc: str = "/Applications/EnergyPlus-9-3-0/",
+    parallelize: bool = False,
+    max_cpu_cores: int = 1,
+    seed: int = 1337,
+    policy_default_action: float = 0.3
+):
+    kwargs = locals()
+    set_random_seed(seed)
+    save_path = _create_save_path(save_path)
+    _save_run_config(save_path, kwargs)
+
+    building_config = load_building_config(building_config_loc)
+    if not zone:
+        zones = building_config["control_zones"]
+    else:
+        zones = [zone]
+
+    total_energy_consumptions = {}
+    log_data = []
+    env, config = _get_zone_env(building_env, building_config_loc, zones,
+                                save_path, energy_plus_loc)
+    env.set_runperiod(num_days, start_year, start_month, start_day)
+    env.set_timestep(config["timesteps_per_hour"])
+
+    state = env.reset()
+    while not env.is_terminate():
+        policy_action = th.Tensor([policy_default_action]*len(zones))
+        state, rewards, _, info = env.step(policy_action)
+        cobs_state = info["cobs_state"]
+        for zone in zones:
+            log_data.append({
+                "time": cobs_state["time"],
+                "timestep": cobs_state["timestep"],
+                "zone": zone,
+                "outdoor_temp": cobs_state["outdoor temperature"],
+                "solar_irradiation": cobs_state["site solar radiation"],
+                "time_hour": cobs_state["time"].hour,
+                "zone_humidity": cobs_state[f"{zone} humidity"],
+                "zone_temp": cobs_state["temperature"][zone],
+                "zone_occupancy": cobs_state["occupancy"][zone],
+                "action":  cobs_state[f"{zone} position"],
+                "reward": rewards[zones.index(zone)]
+            })
+    total_energy_consumptions[zone] = env.total_energy_consumption
+    _save_energy_consumptions(save_path, total_energy_consumptions)
+    _save_log_data(save_path, log_data)
+
+
 def load_building_config(building_config_loc):
     with open(building_config_loc, "r") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
@@ -79,14 +137,27 @@ def _save_energy_consumptions(save_path, total_energy_consumptions):
 
     with open(os.path.join(save_path, "evaluation_report.csv"), "w+") as f:
         for zone in total_energy_consumptions:
-            for policy in total_energy_consumptions[zone]:
-                f.write(f"{zone},{policy},{total_energy_consumptions[zone][policy]}\n")
+            if isinstance(total_energy_consumptions[zone], dict):
+                for policy in total_energy_consumptions[zone]:
+                    f.write(f"{zone},{policy},{total_energy_consumptions[zone][policy]}\n")
+            else:
+                f.write(f"{zone},{total_energy_consumptions[zone]}\n")
+
+
+def _save_log_data(save_path, log_data):
+    df = pd.DataFrame(log_data)
+    df.to_csv(os.path.join(save_path, "log_data.csv"), index=False)
 
 
 def _get_zone_env(building_env, building_config_loc, zone,
                   log_dir, energy_plus_loc):
     config = load_building_config(building_config_loc)
-    config["control_zones"] = [zone]
+
+    if zone is not None:
+        if isinstance(zone, str):
+            config["control_zones"] = [zone]
+        elif isinstance(zone, list):
+            config["control_zones"] = zone
 
     if hasattr(building_env, "value"):
         building_env = building_env.value

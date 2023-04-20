@@ -76,6 +76,10 @@ class TypeABuilding(Building):
             ("Air System Electric Energy", airloop): f"{airloop} energy"
             for airloop in set(self.airloops.values())
             })
+        additional_states.update({
+            ("Zone Air Terminal Minimum Air Flow Fraction", f"{zone} VAV Box Component"):
+                f"{zone} position" for zone in self.available_zones
+        })
         additional_states[('Site Outdoor Air Drybulb Temperature', 'Environment')] = \
             "outdoor temperature"
 
