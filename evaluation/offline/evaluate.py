@@ -21,6 +21,7 @@ def evaluate(methods: List[str] = ["ipw"],
              policy_type: str = "single_agent_ac",
              init_policy_log_std: float = np.log(0.1),
              init_policy_log_std_path: str = "",
+             zone: str = None,
              num_days: int = 15,
              start_day: int = 0,
              start_month: int = 1,
@@ -31,6 +32,7 @@ def evaluate(methods: List[str] = ["ipw"],
              parallelize: bool = False,
              max_cpu_cores: int = 1,
              gaussian_kernel_bandwidth: float = 0.3):
+
     kwargs = locals()
     for method in methods:
         assert method in OPEMethodStrings._value2member_map_, \
@@ -51,7 +53,11 @@ def evaluate(methods: List[str] = ["ipw"],
     end_date = start_date + pd.Timedelta(days=num_days)
     log_data_df = log_data_df[(log_data_df["time"] >= start_date) &
                               (log_data_df["time"] < end_date)]
-    zones = log_data_df["zone"].unique()
+
+    if zone is None:
+        zones = log_data_df["zone"].unique()
+    else:
+        zones = [zone]
 
     policies, policy_paths = load_policy_library(policy_library_path, policy_type,
                                                  init_policy_log_std, init_policy_log_std_path,

@@ -30,6 +30,7 @@ def evaluate_ope(methods: List[OPEMethodStrings] = typer.Option(
                  policy_type: PolicyTypeStrings = typer.Option(...),
                  init_policy_log_std: float = typer.Option(np.log(0.1)),
                  init_policy_log_std_path: str = typer.Option(""),
+                 zone: str = typer.Option(None),
                  num_days: int = typer.Option(...),
                  start_day: int = typer.Option(1),
                  start_month: int = typer.Option(1),
