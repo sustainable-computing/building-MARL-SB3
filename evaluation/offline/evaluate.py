@@ -75,7 +75,8 @@ def evaluate(methods: List[str] = ["ipw"],
                 score = method_obj.evaluate_policy(evaluation_policy=policy,
                                                    evaluation_policy_distribution_fuc=policy.get_distribution,
                                                    behavior_policy=behavior_policy,
-                                                   score="mean")
+                                                   score="mean",
+                                                   return_additional=False)
                 if method not in policy_scores:
                     policy_scores[method] = {}
                 if policy_path not in policy_scores[method]:
@@ -89,7 +90,7 @@ def evaluate(methods: List[str] = ["ipw"],
 
 def _get_method(method, log_data, kwargs):
     if method == OPEMethodStrings.ipw.value:
-        method_obj = InverseProbabilityWeighting(log_data)
+        method_obj = InverseProbabilityWeighting(log_data, no_grad=True)
     elif method == OPEMethodStrings.snip.value:
         method_obj = SNIP(log_data)
     elif method == OPEMethodStrings.snipw.value:

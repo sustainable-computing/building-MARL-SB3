@@ -25,7 +25,8 @@ class InverseProbabilityWeighting(OPEBase):
         self.no_grad = no_grad
 
     def evaluate_policy(self, evaluation_policy_distribution_fuc: callable = None,
-                        behavior_policy: dict = None, score: str = "mean", **kwargs):
+                        behavior_policy: dict = None, score: str = "mean",
+                        return_additional: bool = True, **kwargs):
         """Method to conduct offline policy evaluation
 
         Args:
@@ -63,10 +64,16 @@ class InverseProbabilityWeighting(OPEBase):
 
         iw = action_prob / behavior_prob
         ret_data = iw * rewards
-        if score == "mean":
-            return ret_data.mean(), states, rewards, action_prob, behavior_prob
+        if not return_additional:
+            if score == "mean":
+                return ret_data.mean()
+            else:
+                return ret_data
         else:
-            return ret_data, states, rewards, action_prob, behavior_prob
+            if score == "mean":
+                return ret_data.mean(), states, rewards, action_prob, behavior_prob
+            else:
+                return ret_data, states, rewards, action_prob, behavior_prob
 
     def inv_sigmoid(self, value):
         return np.log(value / (1 - value))
@@ -112,7 +119,8 @@ class SelfNormalizedInverseProbabilityWeighting(OPEBase):
         self.univariate_action = univariate_action
 
     def evaluate_policy(self, evaluation_policy_distribution_fuc: callable = None,
-                        behavior_policy: dict = None, score: str = "mean", **kwargs):
+                        behavior_policy: dict = None, score: str = "mean",
+                        return_additional=True, **kwargs):
         """Method to conduct offline policy evaluation
 
         Args:
@@ -147,10 +155,16 @@ class SelfNormalizedInverseProbabilityWeighting(OPEBase):
 
         iw = action_prob / behavior_prob
         ret_data = iw * rewards / iw.mean()
-        if score == "mean":
-            return ret_data.mean()
+        if not return_additional:
+            if score == "mean":
+                return ret_data.mean()
+            else:
+                return ret_data
         else:
-            return ret_data
+            if score == "mean":
+                return ret_data.mean(), states, rewards, action_prob, behavior_prob
+            else:
+                return ret_data, states, rewards, action_prob, behavior_prob
 
     def inv_sigmoid(self, value):
         return np.log(value / (1 - value))

@@ -118,8 +118,10 @@ if __name__ == "__main__":
         old_gk = pickle.load(f)
     with open("data/policy_evaluation/ope/2023-04-19_18-39-08/gk/policy_scores.pkl", "rb") as f:
         new_gk = pickle.load(f)
-    all_estimated_scores = {"GK_OLD": old_gk, "GK_NEW": new_gk}
-    # corrs = calculate_spearman_correlation(ground_truth, all_estimated_scores, {"GK_OLD": False, "GK_NEW": True})
+    with open("data/policy_evaluation/new_reward_ope/snipw/policy_scores.pkl", "rb") as f:
+        new_snipw = pickle.load(f)
+    all_estimated_scores = {"GK_OLD": old_gk, "GK_NEW": new_gk, "SNIPW_NEW": new_snipw}
+    corrs = calculate_spearman_correlation(ground_truth, all_estimated_scores, {"GK_OLD": False, "GK_NEW": True, "SNIPW_NEW": True})
     # print(corrs)
 
-    calculate_regret_at_k(ground_truth, all_estimated_scores, 10, {"GK_OLD": True, "GK_NEW": False})
+    calculate_regret_at_k(ground_truth, all_estimated_scores, 10, {"GK_OLD": True, "GK_NEW": False, "SNIPW_NEW": False})
