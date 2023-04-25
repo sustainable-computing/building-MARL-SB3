@@ -118,7 +118,8 @@ def evaluate_rule_based(
                 "zone_temp": cobs_state["temperature"][zone],
                 "zone_occupancy": cobs_state["occupancy"][zone],
                 "action":  cobs_state[f"{zone} position"],
-                "reward": rewards[zones.index(zone)]
+                "reward": rewards[zones.index(zone)],
+                "reward_total_hvac": cobs_state["total hvac"],
             })
     total_energy_consumptions[zone] = env.total_energy_consumption
     _save_energy_consumptions(save_path, total_energy_consumptions)

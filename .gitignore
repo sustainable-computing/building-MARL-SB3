@@ -29,3 +29,5 @@ scripts/
 *todo*
 
 wandb/
+cc-outputs/
+cc-scripts/*

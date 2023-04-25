@@ -119,8 +119,8 @@ class FiveZoneBuilding(Building):
         zonewise_state = self.get_state_dict(state)
         self.total_energy_consumption += state["total hvac"]
         self.current_obs_timestep = state["timestep"]
-        # rewards = np.array([-state[f"{zone} vav energy"] for zone in self.control_zones])
-        rewards = np.array([-state["total hvac"] for zone in self.control_zones])
+        rewards = np.array([-state[f"{zone} vav energy"] for zone in self.control_zones])
+        # rewards = np.array([-state["total hvac"] for zone in self.control_zones])
         done = self.model.is_terminate()
         info = {
             "cobs_state": state
