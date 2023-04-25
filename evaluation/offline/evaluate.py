@@ -22,10 +22,11 @@ def evaluate(methods: List[str] = ["ipw"],
              init_policy_log_std: float = np.log(0.1),
              init_policy_log_std_path: str = "",
              zone: str = None,
-             num_days: int = 15,
-             start_day: int = 0,
-             start_month: int = 1,
-             start_year: int = 2019,
+             use_full_log_data: bool = False,
+             num_days: List[int] = [15],
+             start_day: List[int] = [1],
+             start_month: List[int] = [1],
+             start_year: List[int] = [2019],
              use_behavior_p_score: bool = True,
              behavior_policy_path: str = "data/rule_based_log_data/denver/action_probs_all_data.pkl",
              save_path: str = "data/policy_evaluation/ope/",
@@ -48,11 +49,19 @@ def evaluate(methods: List[str] = ["ipw"],
 
     log_data_df = pd.read_csv(log_data_path)
     log_data_df["time"] = pd.to_datetime(log_data_df["time"])
-    # start_date = log_data_df["time"].values[0]
-    start_date = datetime(year=start_year, month=start_month, day=start_day)
-    end_date = start_date + pd.Timedelta(days=num_days)
-    log_data_df = log_data_df[(log_data_df["time"] >= start_date) &
-                              (log_data_df["time"] < end_date)]
+
+    if not use_full_log_data:
+        temp_df = pd.DataFrame(columns=log_data_df.columns)
+        for year, month, day, num_day in zip(start_year, start_month, start_day, num_days):
+            start_row = log_data_df[(log_data_df["time"].dt.year == year) &
+                                    (log_data_df["time"].dt.month == month) &
+                                    (log_data_df["time"].dt.day == day)].index[0]
+            start_date = datetime(year, month, day)
+            end_date = start_date + pd.Timedelta(days=num_day)
+            subset_data = log_data_df[(log_data_df["time"] >= start_date) &
+                                      (log_data_df["time"] < end_date)]
+            temp_df = temp_df.append(subset_data)
+        log_data_df = temp_df
 
     if zone is None:
         zones = log_data_df["zone"].unique()
