@@ -57,8 +57,11 @@ class InverseProbabilityWeighting(OPEBase):
                 action_dist = evaluation_policy_distribution_fuc(state).distribution
             action_prob[i] = self.calculate_action_probability(action_dist, action_bin,
                                                                behavior_policy["action_bins"])
-            behavior_prob[i] = behavior_policy[state_bins_str][action_bin] / \
-                behavior_policy["total_count"]
+            try:
+                behavior_prob[i] = behavior_policy[state_bins_str][action_bin] / \
+                    behavior_policy["total_count"]
+            except KeyError:
+                behavior_prob[i] = 1
             rewards[i] = row["reward"]
             states.append(state)
 

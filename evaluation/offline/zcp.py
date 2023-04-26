@@ -32,12 +32,15 @@ class SNIP(OPEBase):
         else:
             return torch.zeros_like(layer.weight)
 
-    def calculate_loss(self, use_behavior_policy=True):
-        rewards, states, _, policy_action_prob, behavior_action_prob = \
+    def calculate_loss(self, use_behavior_policy=True, return_additional=True):
+        scaled_rewards, states, rewards, policy_action_prob, behavior_action_prob = \
             self.ipw_obj.evaluate_policy(self.policy.get_distribution, self.behavior_policy, score="")
+
+        # scaled_rewards = -scaled_rewards
+
         discounted_rewards = []
         disc_reward = 0
-        for reward in rewards.tolist()[::-1]:
+        for reward in scaled_rewards.tolist()[::-1]:
             disc_reward = reward + (self.gamma * disc_reward)
             discounted_rewards.insert(0, disc_reward)
         states = torch.stack(states)
@@ -52,10 +55,14 @@ class SNIP(OPEBase):
         surr_2 = torch.clamp(ratios, 1.0 - self.eps_clip, 1.0 + self.eps_clip) * advantages
 
         loss = -torch.min(surr_1, surr_2)
-        return loss
+        if not return_additional:
+            return loss
+        else:
+            return loss, scaled_rewards, states, rewards, policy_action_prob, behavior_action_prob
 
     def evaluate_policy(self, evaluation_policy: callable = None,
-                        behavior_policy: dict = None, **kwargs):
+                        behavior_policy: dict = None,
+                        return_additional=False, **kwargs):
         self.policy = evaluation_policy
         self.behavior_policy = behavior_policy
         for layer in self.policy.mlp_extractor.actor_network.modules():
@@ -70,7 +77,12 @@ class SNIP(OPEBase):
                 layer.forward = types.MethodType(self.snip_forward_linear, layer)
 
         self.policy.mlp_extractor.zero_grad()
-        loss = self.calculate_loss(self.log_data)
+        if not return_additional:
+            loss = self.calculate_loss(self.log_data, return_additional=return_additional)
+        else:
+            loss, scaled_rewards, states, rewards,\
+                policy_action_prob, behavior_action_prob = \
+                    self.calculate_loss(self.log_data, return_additional=return_additional)
         loss.mean().backward()
 
         metric_array = []
@@ -81,7 +93,11 @@ class SNIP(OPEBase):
         sum = 0.
         for i in range(len(metric_array)):
             sum += torch.sum(metric_array[i])
-        return sum.item()
+        if not return_additional:
+            return sum.item()
+        else:
+            return sum.item(), loss, scaled_rewards, \
+                states, rewards, policy_action_prob, behavior_action_prob
 
 
 class GaussianKernel(OPEBase):

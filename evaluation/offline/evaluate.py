@@ -21,7 +21,7 @@ def evaluate(methods: List[str] = ["ipw"],
              policy_type: str = "single_agent_ac",
              init_policy_log_std: float = np.log(0.1),
              init_policy_log_std_path: str = "",
-             zone: str = None,
+             zones: List[str] = [],
              use_full_log_data: bool = False,
              num_days: List[int] = [15],
              start_day: List[int] = [1],
@@ -63,15 +63,18 @@ def evaluate(methods: List[str] = ["ipw"],
             temp_df = temp_df.append(subset_data)
         log_data_df = temp_df
 
-    if zone is None:
+    if zones == []:
         zones = log_data_df["zone"].unique()
     else:
-        zones = [zone]
+        zones = zones
+        for zone in zones:
+            assert zone in log_data_df["zone"].unique(), f"Zone {zone} not in log data."
 
     policies, policy_paths = load_policy_library(policy_library_path, policy_type,
                                                  init_policy_log_std, init_policy_log_std_path,
                                                  eval_mode=True)
     policy_scores = {}
+    all_additional_data = {}
     if parallelize:
         # TODO: Implement parallelization
         raise NotImplementedError("Parallelization not implemented yet.")
@@ -81,20 +84,27 @@ def evaluate(methods: List[str] = ["ipw"],
             zone_log_data_df = log_data_df[log_data_df["zone"] == zone]
             method_obj = _get_method(method, zone_log_data_df, kwargs)
             for policy, policy_path in tqdm.tqdm(zip(policies, policy_paths), total=len(policies)):
-                score = method_obj.evaluate_policy(evaluation_policy=policy,
-                                                   evaluation_policy_distribution_fuc=policy.get_distribution,
-                                                   behavior_policy=behavior_policy,
-                                                   score="mean",
-                                                   return_additional=False)
+
+                score, additional_data = get_policy_score(method, method_obj,
+                                                          policy, behavior_policy,
+                                                          return_additional=True)
                 if method not in policy_scores:
                     policy_scores[method] = {}
+                if method not in all_additional_data:
+                    all_additional_data[method] = {}
+                if policy_path not in all_additional_data[method]:
+                    all_additional_data[method][policy_path] = {}
+
                 if policy_path not in policy_scores[method]:
                     policy_scores[method][policy_path] = {}
                 policy_scores[method][policy_path][zone] = score
+                all_additional_data[method][policy_path][zone] = additional_data
 
     for method in methods:
         with open(os.path.join(save_path, method, "policy_scores.pkl"), "wb") as f:
             pickle.dump(policy_scores[method], f)
+        with open(os.path.join(save_path, method, "additional_data.pkl"), "wb") as f:
+            pickle.dump(all_additional_data[method], f)
 
 
 def _get_method(method, log_data, kwargs):
@@ -125,26 +135,54 @@ def _save_run_config(save_path, args):
 
 
 def get_policy_score(method: str,
-                     zone_log_data_df: pd.DataFrame,
+                     method_obj: object,
                      policy: object,
-                     behavior_policy: object) -> float:
+                     behavior_policy: object,
+                     return_additional: bool = True) -> float:
+
+    additional_data = {}
 
     if method == "ipw":
-        ope_method = InverseProbabilityWeighting(zone_log_data_df)
-        score, _, _, _, _ = ope_method.evaluate_policy(policy.get_distribution, behavior_policy, score="mean")
+        scaled_rewards, states, rewards, action_probs, behavior_probs = \
+            method_obj.evaluate_policy(evaluation_policy_distribution=policy.get_distribution,
+                                       behavior_policy=behavior_policy,
+                                       return_additional=True)
+        score = scaled_rewards.mean()
+        additional_data["scaled_rewards"] = scaled_rewards.detach().numpy()
+        additional_data["action_probs"] = action_probs.detach().numpy()
+        additional_data["behavior_probs"] = behavior_probs.detach().numpy()
+
     elif method == "snipw":
-        ope_method = SelfNormalizedInverseProbabilityWeighting(zone_log_data_df)
-        score, _, _, _, _ = ope_method.evaluate_policy(policy.get_distribution, behavior_policy, score="mean")
+        scaled_rewards, states, rewards, action_probs, behavior_probs = \
+            method_obj.evaluate_policy(evaluation_policy_distribution=policy.get_distribution,
+                                       behavior_policy=behavior_policy,
+                                       return_additional=True)
+        score = scaled_rewards.mean()
+        additional_data["scaled_rewards"] = scaled_rewards.detach().numpy()
+        additional_data["action_probs"] = action_probs.detach().numpy()
+        additional_data["behavior_probs"] = behavior_probs.detach().numpy()
+
     elif method == "snip":
-        ope_method = SNIP(zone_log_data_df)
-        score = ope_method.evaluate_policy(policy, behavior_policy)
+        score, losses, scaled_rewards, states, rewards, action_probs, behavior_probs = \
+            method_obj.evaluate_policy(evaluation_policy=policy,
+                                       behavior_policy=behavior_policy,
+                                       return_additional=True)
+        additional_data["losses"] = losses.detach().numpy()
+        additional_data["scaled_rewards"] = scaled_rewards.detach().numpy()
+        additional_data["action_probs"] = action_probs.detach().numpy()
+        additional_data["behavior_probs"] = behavior_probs.detach().numpy()
+
     elif method == "gk":
-        ope_method = GaussianKernel(zone_log_data_df)
-        score = ope_method.evaluate_policy(policy)
+        score = \
+            method_obj.evaluate_policy(policy)
+
     else:
         raise NotImplementedError(f"Method {method} not implemented.")
 
-    return score
+    if return_additional:
+        return score, additional_data
+    else:
+        return score
 
 
 if __name__ == "__main__":

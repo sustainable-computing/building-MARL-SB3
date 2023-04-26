@@ -32,6 +32,7 @@ def evaluate_policies(
     parallelize: bool = False,
     max_cpu_cores: int = 1,
     seed: int = 1337,
+    device: str = "cpu"
 ):
     kwargs = locals()
     set_random_seed(seed)
@@ -46,7 +47,7 @@ def evaluate_policies(
 
     policies, policy_paths = load_policy_library(policy_library_path, policy_type,
                                                  init_policy_log_std, init_policy_log_std_path,
-                                                 eval_mode=True)
+                                                 eval_mode=True, device=device)
     total_energy_consumptions = {}
     for zone in zones:
         zone_env, config = _get_zone_env(building_env, building_config_loc, zone,
@@ -60,7 +61,7 @@ def evaluate_policies(
             while not zone_env.is_terminate():
                 with th.no_grad():
                     policy_action, _, _ = policy(state)
-                state, _, _, _ = zone_env.step(policy_action)
+                state, _, _, _ = zone_env.step(policy_action.cpu().numpy())
                 state = state[zone]
             if zone not in total_energy_consumptions:
                 total_energy_consumptions[zone] = {}

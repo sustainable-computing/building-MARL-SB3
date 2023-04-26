@@ -29,6 +29,7 @@ def evaluate(
     parallelize: bool = typer.Option(False),
     max_cpu_cores: int = typer.Option(1),
     seed: int = typer.Option(1337),
+    device: str = typer.Option("cpu")
 ):
     if hasattr(policy_type, "value"):
         policy_type = policy_type.value
