@@ -1,1 +1,1 @@
-from policies.utils.loadpolicy import load_policy_library
+from policies.utils.loadpolicy import load_policy_library, load_policy

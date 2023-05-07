@@ -2,7 +2,7 @@ import typer
 import numpy as np
 
 from buildingenvs import BuildingEnvStrings
-from evaluation.online.evaluate import evaluate_policies, evaluate_rule_based
+from evaluation.online.evaluate import evaluate_policies, evaluate_rule_based, run_full_simulation
 
 app = typer.Typer()
 
@@ -57,3 +57,20 @@ def evaluate_rbc(
     seed: int = typer.Option(1337)
 ):
     evaluate_rule_based(**locals())
+
+
+@app.command("run-full-simulation")
+def run_full_sim(
+    building_env: BuildingEnvStrings = typer.Option(
+                BuildingEnvStrings.denver.value,
+                help="The building environment to train agents on"),
+    building_config_loc: str = typer.Option(
+        "configs/buildingconfig/building_denver.yaml",
+        help="The location of the building config file"),
+    policy_map_config_loc: str = "configs/policymapconfigs/denver/gt_best_one_year_denver.yaml",
+    energy_plus_loc: str = typer.Option(...),
+    save_path: str = typer.Option("data/policy_map_full_sim/"),
+    seed: int = typer.Option(1337),
+    device: str = typer.Option("cpu")
+):
+    run_full_simulation(**locals())

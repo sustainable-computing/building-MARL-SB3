@@ -1,0 +1,558 @@
+start_day: 1
+start_month: 1
+start_year: 1995
+num_days: 365
+
+zone_policy_map:
+  1:
+    Core_bottom:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Core_mid:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/119_1_1e1_2.pth
+    Core_top:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_bot_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_bot_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_bot_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/117_2_1e-1.pth
+    Perimeter_bot_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_mid_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_mid_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_mid_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_mid_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_top_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_top_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_top_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/119_3_1e0_2.pth
+    Perimeter_top_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+  2:
+    Core_bottom:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Core_mid:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/119_1_1e1_2.pth
+    Core_top:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_bot_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_bot_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_bot_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/117_2_1e-1.pth
+    Perimeter_bot_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_mid_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_mid_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_mid_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_mid_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_top_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_top_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_top_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_top_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+  3:
+    Core_bottom:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Core_mid:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/105_4_1e0_2.pth
+    Core_top:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_bot_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_bot_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_bot_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/117_2_1e-1.pth
+    Perimeter_bot_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_mid_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_mid_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_mid_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_mid_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_top_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_top_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_top_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_top_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+  4:
+    Core_bottom:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Core_mid:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/105_4_1e0_2.pth
+    Core_top:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_bot_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_bot_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_bot_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_1e0_blind.pth
+    Perimeter_bot_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_4_1e1_2.pth
+    Perimeter_mid_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_mid_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_mid_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_4_1e1_2.pth
+    Perimeter_mid_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_4_1e1_2.pth
+    Perimeter_top_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_top_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_top_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_4_1e1_2.pth
+    Perimeter_top_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_4_1e1_2.pth
+  5:
+    Core_bottom:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/107_4_1e0_blind.pth
+    Core_mid:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/105_4_1e0_2.pth
+    Core_top:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_4_1e0_2.pth
+    Perimeter_bot_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_4_1e1_2.pth
+    Perimeter_bot_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_bot_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_1e0_blind.pth
+    Perimeter_bot_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_4_1e1_2.pth
+    Perimeter_mid_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_4_1e1_2.pth
+    Perimeter_mid_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_mid_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_mid_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_4_1e1_2.pth
+    Perimeter_top_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_4_1e1_2.pth
+    Perimeter_top_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e-1_2_blind.pth
+    Perimeter_top_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_4_1e1_2.pth
+    Perimeter_top_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_4_1e1_2.pth
+  6:
+    Core_bottom:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/107_4_1e0_blind.pth
+    Core_mid:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Core_top:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Perimeter_bot_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Perimeter_bot_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_bot_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_1e-1_blind.pth
+    Perimeter_bot_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_mid_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Perimeter_mid_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_mid_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Perimeter_mid_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e1_2.pth
+    Perimeter_top_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Perimeter_top_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_top_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Perimeter_top_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+  7:
+    Core_bottom:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/107_4_1e0_blind.pth
+    Core_mid:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Core_top:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Perimeter_bot_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_bot_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_bot_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_1e-1_blind.pth
+    Perimeter_bot_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_blind.pth
+    Perimeter_mid_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_blind.pth
+    Perimeter_mid_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_mid_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_blind.pth
+    Perimeter_mid_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_blind.pth
+    Perimeter_top_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_blind.pth
+    Perimeter_top_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_top_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_blind.pth
+    Perimeter_top_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_blind.pth
+  8:
+    Core_bottom:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/107_4_1e0_blind.pth
+    Core_mid:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/112_3_1e1_blind.pth
+    Core_top:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/107_4_1e0_blind.pth
+    Perimeter_bot_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_bot_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_bot_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_1e-1_blind.pth
+    Perimeter_bot_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_mid_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_mid_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e1_blind.pth
+    Perimeter_mid_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e1_blind.pth
+    Perimeter_mid_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_top_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_top_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_top_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e1_blind.pth
+    Perimeter_top_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e1_blind.pth
+  9:
+    Core_bottom:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/107_4_1e0_blind.pth
+    Core_mid:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/112_3_1e1_blind.pth
+    Core_top:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Perimeter_bot_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_bot_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_bot_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/112_3_1e1_blind.pth
+    Perimeter_bot_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/119_3_1e1_2.pth
+    Perimeter_mid_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_mid_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_mid_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_mid_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_top_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_top_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/115_1_1e0_2_blind.pth
+    Perimeter_top_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/110_4_1e0_blind.pth
+    Perimeter_top_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+  10:
+    Core_bottom:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/107_4_1e0_blind.pth
+    Core_mid:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/117_2_1e-1.pth
+    Core_top:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/107_4_1e0_blind.pth
+    Perimeter_bot_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Perimeter_bot_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_blind.pth
+    Perimeter_bot_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_1e-1_blind.pth
+    Perimeter_bot_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Perimeter_mid_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Perimeter_mid_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_1e0_2.pth
+    Perimeter_mid_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_blind.pth
+    Perimeter_mid_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Perimeter_top_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Perimeter_top_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_2_1e0_2.pth
+    Perimeter_top_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_top_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+  11:
+    Core_bottom:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/107_4_1e0_blind.pth
+    Core_mid:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e0_2.pth
+    Core_top:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_1_1e-1_2.pth
+    Perimeter_bot_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_bot_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_bot_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/112_3_1e0_blind.pth
+    Perimeter_bot_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_mid_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_mid_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_mid_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_mid_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_top_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_top_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_top_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+    Perimeter_top_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_0_1e1_blind.pth
+  12:
+    Core_bottom:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/113_4_1e1_2.pth
+    Core_mid:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/117_2_1e-1.pth
+    Core_top:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/119_3_1e1_2.pth
+    Perimeter_bot_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e1_2.pth
+    Perimeter_bot_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e1_2.pth
+    Perimeter_bot_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/112_3_1e0_blind.pth
+    Perimeter_bot_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e1_2.pth
+    Perimeter_mid_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e1_2.pth
+    Perimeter_mid_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e1_2.pth
+    Perimeter_mid_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e1_2.pth
+    Perimeter_mid_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e1_2.pth
+    Perimeter_top_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e1_2.pth
+    Perimeter_top_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e1_2.pth
+    Perimeter_top_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e1_2.pth
+    Perimeter_top_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/118_4_1e1_2.pth

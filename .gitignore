@@ -19,6 +19,7 @@ data/policy_librar*
 data/*logs
 data/hyperparam_sweeps/
 data/train*
+data/policy_map*
 
 notebooks/
 

@@ -2,7 +2,8 @@ from buildingenvs import BuildingEnvStrings
 from buildingenvs import TypeABuilding
 from buildingenvs import DOOEBuilding
 from buildingenvs import FiveZoneBuilding
-from policies.utils import load_policy_library
+from policies.utils import load_policy_library, load_policy
+from utils.configs import load_config
 
 from datetime import datetime
 import numpy as np
@@ -125,6 +126,97 @@ def evaluate_rule_based(
     total_energy_consumptions[zone] = env.total_energy_consumption
     _save_energy_consumptions(save_path, total_energy_consumptions)
     _save_log_data(save_path, log_data)
+
+
+def run_full_simulation(
+    building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
+    building_config_loc: str = "configs/buildingconfig/building_denver.yaml",
+    policy_map_config_loc: str = "configs/policymapconfigs/denver/gt_best_one_year_denver.yaml",
+    save_path: str = "data/policy_evaluation/brute_force/",
+    energy_plus_loc: str = "/Applications/EnergyPlus-9-3-0/",
+    seed: int = 1337,
+    device: str = "cpu"
+):
+    building_config = load_building_config(building_config_loc)
+    zones = building_config["control_zones"]
+
+    policy_map_config = load_config(policy_map_config_loc)
+
+    policy_map = {month: {} for month in range(1, 13)}
+    if -1 in policy_map_config["zone_policy_map"]:
+        for month in policy_map:
+            policy_map[month] = policy_map_config["zone_policy_map"][-1]
+    else:
+        for month in policy_map:
+            if month in policy_map_config["zone_policy_map"]:
+                month_map_config = policy_map_config["zone_policy_map"][month]
+                assert set(month_map_config.keys()) == set(zones), \
+                    f"Policy map config for month {month} does not contain all zones"
+                policy_map[month] = month_map_config
+            else:
+                raise ValueError(f"Policy map config does not contain month {month}")
+
+    kwargs = locals()
+    set_random_seed(seed)
+    save_path = _create_save_path(save_path)
+    _save_run_config(save_path, kwargs)
+
+    policy_map = load_policy_map(policy_map, device)
+
+    env, config = _get_zone_env(building_env, building_config_loc, zones,
+                                save_path, energy_plus_loc)
+
+    num_days, start_year, start_month, start_day = \
+        policy_map_config["num_days"], policy_map_config["start_year"], \
+        policy_map_config["start_month"], policy_map_config["start_day"]
+    env.set_runperiod(num_days, start_year, start_month, start_day)
+    env.set_timestep(config["timesteps_per_hour"])
+
+    total_energy_consumptions = {}
+    log_data = []
+    state, info = env.reset(return_info=True)
+    while not env.is_terminate():
+        actions = []
+        month = info["cobs_state"]["time"].month
+        print(month)
+        for zone in zones:
+            policy = policy_map[month][zone]["policy_obj"]
+            with th.no_grad():
+                policy_action, _, _ = policy(state[zone])
+            actions.append(policy_action)
+        actions = th.Tensor(actions, device=device)
+        state, rewards, _, info = env.step(actions)
+        cobs_state = info["cobs_state"]
+        for zone in zones:
+            log_data.append({
+                "time": cobs_state["time"],
+                "timestep": cobs_state["timestep"],
+                "zone": zone,
+                "outdoor_temp": cobs_state["outdoor temperature"],
+                "solar_irradiation": cobs_state["site solar radiation"],
+                "time_hour": cobs_state["time"].hour,
+                "zone_humidity": cobs_state[f"{zone} humidity"],
+                "zone_temp": cobs_state["temperature"][zone],
+                "zone_occupancy": cobs_state["occupancy"][zone],
+                "action":  cobs_state[f"{zone} position"],
+                "reward": rewards[zones.index(zone)],
+                "reward_total_hvac": cobs_state["total hvac"],
+            })
+    total_energy_consumptions[zone] = env.total_energy_consumption
+    _save_energy_consumptions(save_path, total_energy_consumptions)
+    _save_log_data(save_path, log_data)
+
+
+def load_policy_map(policy_map: dict, device: str = "cpu"):
+    for month in policy_map:
+        for zone in policy_map[month]:
+            policy_path = policy_map[month][zone]["policy"]
+            policy_init_log_std = policy_map[month][zone]["init_log_std"]
+            policy_obj = load_policy(policy_path, "single_agent_ac",
+                                     policy_init_log_std, "", True,
+                                     device)
+            policy_map[month][zone]["policy_obj"] = policy_obj
+    return policy_map
 
 
 def load_building_config(building_config_loc):

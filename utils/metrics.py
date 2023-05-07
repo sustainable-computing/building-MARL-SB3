@@ -71,8 +71,11 @@ def calculate_regret_at_k(ground_truth: pd.DataFrame,
 
     regret_at_k = {method: {} for method in all_methods}
 
-    all_zones = ground_truth["zone"].unique()
+    all_zones = set(ground_truth["zone"].unique()) - set(zone_exclusions)
     for method in all_estimated_scores_df.keys():
+        estimated_score_zones = set(all_estimated_scores_df[method]["zone"].unique()) - set(zone_exclusions)
+        assert set(estimated_score_zones) == set(all_zones), \
+            f"All zones must be present in estimated scores. {estimated_score_zones} != {set(all_zones)}"
         for zone in all_zones:
             if zone in zone_exclusions:
                 continue
@@ -89,7 +92,8 @@ def calculate_regret_at_k(ground_truth: pd.DataFrame,
 def _regret_at_k(ground_truth: pd.DataFrame,
                  estimated_scores: pd.DataFrame,
                  k: int,
-                 prediction_sort_ascending: bool):
+                 prediction_sort_ascending: bool,
+                 return_top_k_policies: bool = False):
     ground_truth = ground_truth.sort_values(by="energy")
     max_delta = max(ground_truth["energy"]) - min(ground_truth["energy"])
     prediction = estimated_scores.sort_values(by=["score"], ascending=prediction_sort_ascending)
@@ -109,19 +113,37 @@ def _regret_at_k(ground_truth: pd.DataFrame,
     best_predicted_value = min(top_k_values)
     regret = (best_predicted_value - best_ground_truth_value) / max_delta
 
+    if return_top_k_policies:
+        return regret, top_k_policies, top_k_policies[top_k_values.index(best_predicted_value)]
     return regret
 
 
 if __name__ == "__main__":
-    ground_truth = pd.read_csv("data/policy_evaluation/brute_force/reports/evaluation_report_2023-02-27_12-43-04.csv")
-    with open("data/policy_evaluation/ope/ope_across_year/2023-03-15_22-23-28/gk/policy_scores.pkl", "rb") as f:
-        old_gk = pickle.load(f)
-    with open("data/policy_evaluation/ope/2023-04-19_18-39-08/gk/policy_scores.pkl", "rb") as f:
-        new_gk = pickle.load(f)
-    with open("data/policy_evaluation/new_reward_ope/snipw/policy_scores.pkl", "rb") as f:
-        new_snipw = pickle.load(f)
-    all_estimated_scores = {"GK_OLD": old_gk, "GK_NEW": new_gk, "SNIPW_NEW": new_snipw}
-    corrs = calculate_spearman_correlation(ground_truth, all_estimated_scores, {"GK_OLD": False, "GK_NEW": True, "SNIPW_NEW": True})
-    # print(corrs)
+    estimated_scores_locs = {
+        "SNIP*_JAN": "../../data/policy_evaluation/ope_additional_data_collection/jan/combined/snip/policy_scores.pkl",
+        "SNIP*_JUNE": "../../data/policy_evaluation/ope_additional_data_collection/june/combined/snip/policy_scores.pkl"
+    }
+    estimated_scores_sort_order = {
+        key: False for key in estimated_scores_locs.keys()
+    }
 
-    calculate_regret_at_k(ground_truth, all_estimated_scores, 10, {"GK_OLD": True, "GK_NEW": False, "SNIPW_NEW": False})
+    additional_data_loc = {
+        "SNIP*_JAN": "data/policy_evaluation/ope_additional_data_collection/jan/combined/snip/additional_data.pkl",
+        "SNIP*_JUNE": "../../data/policy_evaluation/ope_additional_data_collection/june/combined/snip/additional_data.pkl"
+    }
+
+    one_month_eval_loc = "../../data/policy_evaluation/brute_force/reports/evaluation_report_20220820.csv"
+    one_year_eval_loc = "../../data/policy_evaluation/brute_force/reports/evaluation_report_2023-02-27_12-43-04.csv"
+
+    estimated_scores = {}
+    for method in estimated_scores_locs.keys():
+        with open(estimated_scores_locs[method], "rb") as f:
+            estimated_scores[method] = pickle.load(f)
+
+    one_month_df = pd.read_csv(one_month_eval_loc)
+    one_year_df = pd.read_csv(one_year_eval_loc)
+
+    one_month_df["policy"] = one_month_df["policy"].apply(lambda name: "data/policy_libraries/"+name)
+    zone_exclusions = list(set(one_month_df["zone"].unique()) - set(one_year_df["zone"]))
+
+    calculate_regret_at_k(one_month_df, estimated_scores, 1, estimated_scores_sort_order, zone_exclusions=zone_exclusions)

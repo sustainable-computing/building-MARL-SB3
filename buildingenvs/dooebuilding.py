@@ -126,7 +126,7 @@ class DOOEBuilding(Building):
         }
         return zonewise_state, rewards, done, info
 
-    def reset(self):
+    def reset(self, return_info=False):
         if self.logger:
             self.logger.record("total_energy_consumption", self.total_energy_consumption)
             if wandb.run is not None:
@@ -135,4 +135,6 @@ class DOOEBuilding(Building):
         zonewise_state = self.get_state_dict(state)
         self.total_energy_consumption = state["total hvac"]
         self.current_obs_timestep = state["timestep"]
+        if return_info:
+            return zonewise_state, {"cobs_state": state}
         return zonewise_state
