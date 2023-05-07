@@ -178,7 +178,6 @@ def run_full_simulation(
     while not env.is_terminate():
         actions = []
         month = info["cobs_state"]["time"].month
-        print(month)
         for zone in zones:
             policy = policy_map[month][zone]["policy_obj"]
             with th.no_grad():
