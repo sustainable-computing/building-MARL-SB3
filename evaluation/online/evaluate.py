@@ -182,7 +182,7 @@ def run_full_simulation(
         for zone in zones:
             policy = policy_map[month][zone]["policy_obj"]
             with th.no_grad():
-                policy_action, _, _ = policy(state[zone])
+                policy_action, _, _ = policy(th.Tensor(state[zone], device=device))
             actions.append(policy_action)
         actions = th.Tensor(actions, device=device)
         state, rewards, _, info = env.step(actions)
