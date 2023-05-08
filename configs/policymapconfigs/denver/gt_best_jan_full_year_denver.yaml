@@ -1,0 +1,52 @@
+start_day: 1
+start_month: 1
+start_year: 1995
+num_days: 365
+
+zone_policy_map:
+  -1: 
+    Core_bottom:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/103_0_1e-1_2.pth
+    Core_mid:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/103_0_1e-1_2.pth
+    Core_top:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/103_0_1e-1_2.pth
+    Perimeter_bot_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/106_4_1e-1_2_blind.pth
+    Perimeter_bot_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_4_1e1_blind.pth
+    Perimeter_bot_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/103_0_1e-1_2.pth
+    Perimeter_bot_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_4_1e1_blind.pth
+    Perimeter_mid_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/103_0_1e-1_2.pth
+    Perimeter_mid_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/103_0_1e-1_2.pth
+    Perimeter_mid_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/103_0_1e-1_2.pth
+    Perimeter_mid_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/103_0_1e-1_2.pth
+    Perimeter_top_ZN_1:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/105_4_1e0_2_blind.pth
+    Perimeter_top_ZN_2:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/102_4_1e1_blind.pth
+    Perimeter_top_ZN_3:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/103_0_1e-1_2.pth
+    Perimeter_top_ZN_4:
+      init_log_std: -2.3025850929940455
+      policy: data/policy_libraries/policy_library_20220820/111_1_1e1.pth
