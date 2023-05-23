@@ -76,6 +76,12 @@ class FiveZoneBuilding(Building):
             ("Zone Air Terminal Minimum Air Flow Fraction", f"{zone} VAV Box Component"):
                 f"{zone} position" for zone in self.available_zones
         })
+        for key in ["Zone Air System Sensible Heating Energy",
+                    "Zone Air System Sensible Cooling Energy"]:
+            additional_states.update({
+                (key, f"{zone}"): key.replace("Zone", zone) for zone in self.available_zones
+            })
+
         additional_states[('Site Outdoor Air Drybulb Temperature', 'Environment')] = \
             "outdoor temperature"
 

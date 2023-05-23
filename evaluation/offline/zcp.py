@@ -17,9 +17,14 @@ class SNIP(OPEBase):
     def __init__(self, log_data: pd.DataFrame,
                  eps_clip: float = 0.2,
                  gamma: float = 1.,
+                 rule_based_behavior_policy: bool = True,
                  **kwargs):
         self.log_data = log_data
-        self.ipw_obj = InverseProbabilityWeighting(log_data)
+        self.rule_based_behavior_policy = rule_based_behavior_policy
+        self.ipw_obj = \
+            InverseProbabilityWeighting(log_data,
+                                        rule_based_behavior_policy=rule_based_behavior_policy,
+                                        no_grad=False)
         self.eps_clip = eps_clip
         self.gamma = gamma
 

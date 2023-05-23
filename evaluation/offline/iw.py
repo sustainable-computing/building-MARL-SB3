@@ -14,7 +14,9 @@ class InverseProbabilityWeighting(OPEBase):
 
     def __init__(self, log_data: pd.DataFrame = None,
                  univariate_action: bool = True,
-                 no_grad: bool = False, **kwargs):
+                 no_grad: bool = False,
+                 rule_based_behavior_policy: bool = True,
+                 **kwargs):
         """Class constructor for the InverseProbabilityWeighting class
 
         Args:
@@ -23,6 +25,7 @@ class InverseProbabilityWeighting(OPEBase):
         self.log_data = log_data
         self.univariate_action = univariate_action
         self.no_grad = no_grad
+        self.rule_based_behavior_policy = rule_based_behavior_policy
 
     def evaluate_policy(self, evaluation_policy_distribution_fuc: callable = None,
                         behavior_policy: dict = None, score: str = "mean",
@@ -41,31 +44,49 @@ class InverseProbabilityWeighting(OPEBase):
         behavior_prob = torch.zeros((len(data)))
         states = []
 
+        if not self.rule_based_behavior_policy:
+            behavior_policy = behavior_policy.get_distribution
+
         for i, row in enumerate(data):
             state_vars = ["outdoor_temp", "solar_irradiation", "time_hour",
                           "zone_humidity", "zone_temp", "zone_occupancy"]
             state = torch.Tensor([row[var] for var in state_vars])
-
-            state_bins = [np.digitize(row[var],
-                          behavior_policy[f"{var}_bins"])-1 for var in state_vars]
-            action_bin = np.digitize(row["action"], behavior_policy["action_bins"]) - 1
-            state_bins_str = "{},{},{},{},{},{}".format(*state_bins)
-            if self.no_grad:
-                with torch.no_grad():
+            if self.rule_based_behavior_policy:
+                state_bins = [np.digitize(row[var],
+                            behavior_policy[f"{var}_bins"])-1 for var in state_vars]
+                action_bin = np.digitize(row["action"], behavior_policy["action_bins"]) - 1
+                state_bins_str = "{},{},{},{},{},{}".format(*state_bins)
+                if self.no_grad:
+                    with torch.no_grad():
+                        action_dist = evaluation_policy_distribution_fuc(state).distribution
+                else:
                     action_dist = evaluation_policy_distribution_fuc(state).distribution
+                action_prob[i] = self.calculate_action_probability(action_dist, action_bin,
+                                                                behavior_policy["action_bins"])
+                try:
+                    behavior_prob[i] = behavior_policy[state_bins_str][action_bin] / \
+                        behavior_policy["total_count"]
+                except KeyError:
+                    behavior_prob[i] = 1
+                rewards[i] = row["reward"]
+                states.append(state)
             else:
-                action_dist = evaluation_policy_distribution_fuc(state).distribution
-            action_prob[i] = self.calculate_action_probability(action_dist, action_bin,
-                                                               behavior_policy["action_bins"])
-            try:
-                behavior_prob[i] = behavior_policy[state_bins_str][action_bin] / \
-                    behavior_policy["total_count"]
-            except KeyError:
-                behavior_prob[i] = 1
-            rewards[i] = row["reward"]
-            states.append(state)
+                action = torch.Tensor([row["action"]])
+                if self.no_grad:
+                    with torch.no_grad():
+                        action_dist = evaluation_policy_distribution_fuc(state).distribution
+                        behavior_dist = behavior_policy(state).distribution
+                else:
+                    action_dist = evaluation_policy_distribution_fuc(state).distribution
+                    behavior_dist = behavior_policy(state).distribution
+                action_prob[i] = action_dist.log_prob(self.inv_sigmoid(action)).exp()
+                behavior_prob[i] = behavior_dist.log_prob(self.inv_sigmoid(action)).exp()
+                rewards[i] = row["reward"]
+                states.append(state)
 
+        behavior_prob += 1e-10
         iw = action_prob / behavior_prob
+        iw = torch.clamp(iw, 0, 1e4)
         ret_data = iw * rewards
         if not return_additional:
             if score == "mean":

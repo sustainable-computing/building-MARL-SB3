@@ -108,15 +108,23 @@ def evaluate(methods: List[str] = ["ipw"],
 
 
 def _get_method(method, log_data, kwargs):
+    if "rule_based_behavior_policy" in kwargs:
+        rule_based_behavior_policy = kwargs["rule_based_behavior_policy"]
+    else:
+        rule_based_behavior_policy = True
     if method == OPEMethodStrings.ipw.value:
-        method_obj = InverseProbabilityWeighting(log_data, no_grad=True)
+        method_obj = \
+            InverseProbabilityWeighting(log_data, no_grad=True,
+                                        rule_based_behavior_policy=rule_based_behavior_policy)
     elif method == OPEMethodStrings.snip.value:
-        method_obj = SNIP(log_data)
+        method_obj = SNIP(log_data, rule_based_behavior_policy=rule_based_behavior_policy)
     elif method == OPEMethodStrings.snipw.value:
         method_obj = SelfNormalizedInverseProbabilityWeighting(log_data)
     elif method == OPEMethodStrings.gk.value:
         method_obj = GaussianKernel(log_data=log_data,
                                     bandwidth=kwargs["gaussian_kernel_bandwidth"])
+    else:
+        raise NotImplementedError(f"Method {method} not implemented yet.")
 
     return method_obj
 
@@ -138,7 +146,7 @@ def get_policy_score(method: str,
                      method_obj: object,
                      policy: object,
                      behavior_policy: object,
-                     return_additional: bool = True) -> float:
+                     return_additional: bool = True):
 
     additional_data = {}
 
@@ -183,8 +191,3 @@ def get_policy_score(method: str,
         return score, additional_data
     else:
         return score
-
-
-if __name__ == "__main__":
-    # Run tests if necessary
-    evaluate()
