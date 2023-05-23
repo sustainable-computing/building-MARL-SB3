@@ -19,6 +19,11 @@ class SNIP(OPEBase):
                  gamma: float = 1.,
                  rule_based_behavior_policy: bool = True,
                  **kwargs):
+
+        if "device" in kwargs:
+            self.device = kwargs["device"]
+        else:
+            self.device = "cpu"
         self.log_data = log_data
         self.rule_based_behavior_policy = rule_based_behavior_policy
         self.ipw_obj = \
@@ -39,7 +44,8 @@ class SNIP(OPEBase):
 
     def calculate_loss(self, use_behavior_policy=True, return_additional=True):
         scaled_rewards, states, rewards, policy_action_prob, behavior_action_prob = \
-            self.ipw_obj.evaluate_policy(self.policy.get_distribution, self.behavior_policy, score="")
+            self.ipw_obj.evaluate_policy(self.policy.get_distribution, self.behavior_policy, score="",
+                                         device=self.device)
 
         # scaled_rewards = -scaled_rewards
 
@@ -48,9 +54,9 @@ class SNIP(OPEBase):
         for reward in scaled_rewards.tolist()[::-1]:
             disc_reward = reward + (self.gamma * disc_reward)
             discounted_rewards.insert(0, disc_reward)
-        states = torch.stack(states)
+        states = torch.stack(states).to(self.device)
         state_values = self.policy.mlp_extractor.critic_network(states).squeeze()
-        discounted_rewards = torch.tensor(discounted_rewards, dtype=torch.float32)
+        discounted_rewards = torch.tensor(discounted_rewards, dtype=torch.float32, device=self.device)
         discounted_rewards = (discounted_rewards - discounted_rewards.mean()) / (discounted_rewards.std() + 1e-7)
 
         ratios = policy_action_prob / behavior_action_prob
@@ -101,8 +107,11 @@ class SNIP(OPEBase):
         if not return_additional:
             return sum.item()
         else:
-            return sum.item(), loss, scaled_rewards, \
-                states, rewards, policy_action_prob, behavior_action_prob
+            return sum.item(), loss.cpu(), \
+                scaled_rewards.cpu(), \
+                states.cpu(), rewards.cpu(), \
+                policy_action_prob.cpu(), \
+                behavior_action_prob.cpu()
 
 
 class GaussianKernel(OPEBase):

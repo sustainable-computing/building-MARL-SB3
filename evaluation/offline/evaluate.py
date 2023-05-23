@@ -108,16 +108,13 @@ def evaluate(methods: List[str] = ["ipw"],
 
 
 def _get_method(method, log_data, kwargs):
-    if "rule_based_behavior_policy" in kwargs:
-        rule_based_behavior_policy = kwargs["rule_based_behavior_policy"]
-    else:
-        rule_based_behavior_policy = True
+    if "rule_based_behavior_policy" not in kwargs:
+        kwargs["rule_based_behavior_policy"] = True
     if method == OPEMethodStrings.ipw.value:
         method_obj = \
-            InverseProbabilityWeighting(log_data, no_grad=True,
-                                        rule_based_behavior_policy=rule_based_behavior_policy)
+            InverseProbabilityWeighting(log_data, no_grad=True)
     elif method == OPEMethodStrings.snip.value:
-        method_obj = SNIP(log_data, rule_based_behavior_policy=rule_based_behavior_policy)
+        method_obj = SNIP(log_data, **kwargs)
     elif method == OPEMethodStrings.snipw.value:
         method_obj = SelfNormalizedInverseProbabilityWeighting(log_data)
     elif method == OPEMethodStrings.gk.value:

@@ -353,6 +353,7 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
             policy_scores[zone][policy_path] = score
             # print(score)
             additional_data_dict[zone][policy_path] = additional_data
+        policy_scores = {ope_method: policy_scores}
         zone_score_df = convert_score_dict_to_df(policy_scores)
         print("Saving zone score df...")
         zone_score_df.to_csv(f"{prev_month_num}-{zone}.csv")

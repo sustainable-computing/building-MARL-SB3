@@ -37,11 +37,16 @@ class InverseProbabilityWeighting(OPEBase):
             behavior_action_model (dict): The saved action model generated from log data
             score (str): String indicating which scoring metric to use. Default is mean
         """
-        data = self.log_data.to_dict("records")
-        action_prob = torch.zeros((len(data)))
-        rewards = torch.zeros((len(data)))
+        if "device" in kwargs:
+            self.device = kwargs["device"]
+        else:
+            self.device = "cpu"
 
-        behavior_prob = torch.zeros((len(data)))
+        data = self.log_data.to_dict("records")
+        action_prob = torch.zeros((len(data)), device=self.device)
+        rewards = torch.zeros((len(data)), device=self.device)
+
+        behavior_prob = torch.zeros((len(data)), device=self.device)
         states = []
 
         if not self.rule_based_behavior_policy:
@@ -50,7 +55,7 @@ class InverseProbabilityWeighting(OPEBase):
         for i, row in enumerate(data):
             state_vars = ["outdoor_temp", "solar_irradiation", "time_hour",
                           "zone_humidity", "zone_temp", "zone_occupancy"]
-            state = torch.Tensor([row[var] for var in state_vars])
+            state = torch.tensor([row[var] for var in state_vars], device=self.device)
             if self.rule_based_behavior_policy:
                 state_bins = [np.digitize(row[var],
                             behavior_policy[f"{var}_bins"])-1 for var in state_vars]
@@ -71,7 +76,7 @@ class InverseProbabilityWeighting(OPEBase):
                 rewards[i] = row["reward"]
                 states.append(state)
             else:
-                action = torch.Tensor([row["action"]])
+                action = torch.tensor([row["action"]], device=self.device)
                 if self.no_grad:
                     with torch.no_grad():
                         action_dist = evaluation_policy_distribution_fuc(state).distribution
@@ -100,7 +105,10 @@ class InverseProbabilityWeighting(OPEBase):
                 return ret_data, states, rewards, action_prob, behavior_prob
 
     def inv_sigmoid(self, value):
-        return np.log(value / (1 - value))
+        if self.device == "cpu":
+            return np.log(value / (1 - value))
+        else:
+            return torch.log(value / (1 - value))
 
     def calculate_action_probability(self, dist, bin, action_bins):
         bin_l = self.inv_sigmoid(action_bins[bin])
