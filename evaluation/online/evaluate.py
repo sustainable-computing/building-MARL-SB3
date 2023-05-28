@@ -323,6 +323,9 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
                          policy_type, init_policy_log_std,
                          init_policy_log_std_path,
                          device, kwargs):
+
+    best_estimated_policy_map = {}
+
     log_data_df = pd.DataFrame.from_records(log_data)
     log_data_df["time"] = pd.to_datetime(log_data_df["time"])
     log_data_df = log_data_df[log_data_df["time"].dt.month == prev_month_num]
@@ -344,6 +347,7 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
         if zone not in policy_scores:
             policy_scores[zone] = {}
             additional_data_dict[zone] = {}
+            best_estimated_policy_map[zone] = {}
 
         for policy, policy_path in tqdm.tqdm(zip(policies, policy_paths), total=len(policies)):
             score, additional_data = get_policy_score(ope_method, method_obj,
@@ -354,11 +358,20 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
             # print(score)
             additional_data_dict[zone][policy_path] = additional_data
         policy_scores = {ope_method: policy_scores}
-        zone_score_df = convert_score_dict_to_df(policy_scores)
-        print("Saving zone score df...")
-        zone_score_df.to_csv(f"{prev_month_num}-{zone}.csv")
+        zone_score_df = convert_score_dict_to_df(policy_scores)[ope_method]
+
+        sorted_scores_df = zone_score_df.sort_values(by="score")
+        best_zone_policy = sorted_scores_df["policy"].values[0]
+        best_zone_policy_idx = policy_paths.index(best_zone_policy)
+        best_zone_policy_obj = policies[best_zone_policy_idx]
+
+        best_estimated_policy_map[zone]["policy"] = best_zone_policy
+        best_estimated_policy_map[zone]["policy_obj"] = best_zone_policy_obj
+
+        # print("Saving zone score df...")
+        # zone_score_df.to_csv(f"{prev_month_num}-{zone}.csv")
     # TODO: Rank policies and choose the best one
-    return None
+    return best_estimated_policy_map
 
 
 def _save_energy_consumptions(save_path, total_energy_consumptions):
