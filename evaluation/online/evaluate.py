@@ -270,6 +270,7 @@ def run_full_automated_swapping_simulation(
                                                      policy_library_path, policy_type,
                                                      init_policy_log_std,
                                                      init_policy_log_std_path, device,
+                                                     save_path,
                                                      kwargs)
         for zone in zones:
             policy = policy_map[month][zone]["policy_obj"]
@@ -322,7 +323,8 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
                          policy_library_path,
                          policy_type, init_policy_log_std,
                          init_policy_log_std_path,
-                         device, kwargs):
+                         device, save_path,
+                         kwargs):
 
     best_estimated_policy_map = {}
 
@@ -336,8 +338,8 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
                                                  eval_mode=True, device=device)
 
     ope_method = policy_map_config["ope_method"]
-    policy_scores = {}
-    additional_data_dict = {}
+    policy_scores = {ope_method: {}}
+    additional_data_dict = {ope_method: {}}
     kwargs["rule_based_behavior_policy"] = False
     for zone in prev_policy_map:
         zone_log_data_df = log_data_df[log_data_df["zone"] == zone]
@@ -345,8 +347,8 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
         behavior_policy = prev_policy_map[zone]["policy_obj"]
 
         if zone not in policy_scores:
-            policy_scores[zone] = {}
-            additional_data_dict[zone] = {}
+            policy_scores[ope_method][zone] = {}
+            additional_data_dict[ope_method][zone] = {}
             best_estimated_policy_map[zone] = {}
 
         for policy, policy_path in tqdm.tqdm(zip(policies, policy_paths), total=len(policies)):
@@ -354,10 +356,9 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
                                                       policy, behavior_policy,
                                                       return_additional=True)
 
-            policy_scores[zone][policy_path] = score
+            policy_scores[ope_method][zone][policy_path] = score
             # print(score)
-            additional_data_dict[zone][policy_path] = additional_data
-        policy_scores = {ope_method: policy_scores}
+            additional_data_dict[ope_method][zone][policy_path] = additional_data
         zone_score_df = convert_score_dict_to_df(policy_scores)[ope_method]
 
         sorted_scores_df = zone_score_df.sort_values(by="score")
@@ -368,9 +369,14 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
         best_estimated_policy_map[zone]["policy"] = best_zone_policy
         best_estimated_policy_map[zone]["policy_obj"] = best_zone_policy_obj
 
-        # print("Saving zone score df...")
-        # zone_score_df.to_csv(f"{prev_month_num}-{zone}.csv")
-    # TODO: Rank policies and choose the best one
+    log_data_save_path = os.path.join(save_path, f"policy_ranking_{prev_month_num}/")
+    if not os.path.exists(log_data_save_path):
+        os.makedirs(log_data_save_path)
+    with open(log_data_save_path, "wb+") as f:
+        pickle.dump(policy_scores, f)
+    with open(log_data_save_path, "wb+") as f:
+        pickle.dump(additional_data_dict, f)
+
     return best_estimated_policy_map
 
 
