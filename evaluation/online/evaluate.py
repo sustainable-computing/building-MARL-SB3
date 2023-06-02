@@ -338,7 +338,7 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
                                                  eval_mode=True, device=device)
 
     ope_method = policy_map_config["ope_method"]
-    policy_scores = {ope_method: {}}
+    policy_scores = {}
     additional_data_dict = {ope_method: {}}
     kwargs["rule_based_behavior_policy"] = False
     for zone in prev_policy_map:
@@ -346,7 +346,7 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
         method_obj = _get_method(ope_method, zone_log_data_df, kwargs)
         behavior_policy = prev_policy_map[zone]["policy_obj"]
 
-        if zone not in policy_scores:
+        if zone not in additional_data_dict:
             additional_data_dict[ope_method][zone] = {}
             best_estimated_policy_map[zone] = {}
 
@@ -356,12 +356,12 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
                                                       return_additional=True)
             # print(zone, policy_path, score)
             if policy_path not in policy_scores:
-                policy_scores[ope_method][policy_path] = {}
-            policy_scores[ope_method][policy_path][zone] = score
+                policy_scores[policy_path] = {}
+            policy_scores[policy_path][zone] = score
             additional_data_dict[ope_method][zone][policy_path] = additional_data
-        zone_score_df = convert_score_dict_to_df(policy_scores)[ope_method]
+        zone_score_df = convert_score_dict_to_df({ope_method: policy_scores})[ope_method]
         # print(zone_score_df)
-        sorted_scores_df = zone_score_df.sort_values(by="score")
+        sorted_scores_df = zone_score_df.sort_values(by="score", ascending=False)
         best_zone_policy = sorted_scores_df["policy"].values[0]
         best_zone_policy_idx = policy_paths.index(best_zone_policy)
         best_zone_policy_obj = policies[best_zone_policy_idx]
