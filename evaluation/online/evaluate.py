@@ -347,7 +347,6 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
         behavior_policy = prev_policy_map[zone]["policy_obj"]
 
         if zone not in policy_scores:
-            policy_scores[ope_method][zone] = {}
             additional_data_dict[ope_method][zone] = {}
             best_estimated_policy_map[zone] = {}
 
@@ -355,12 +354,12 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
             score, additional_data = get_policy_score(ope_method, method_obj,
                                                       policy, behavior_policy,
                                                       return_additional=True)
-
-            policy_scores[ope_method][zone][policy_path] = score
-            # print(score)
+            if policy_path not in policy_scores:
+                policy_scores[ope_method][policy_path] = {}
+            policy_scores[ope_method][policy_path][zone] = score
             additional_data_dict[ope_method][zone][policy_path] = additional_data
         zone_score_df = convert_score_dict_to_df(policy_scores)[ope_method]
-
+        print(zone_score_df)
         sorted_scores_df = zone_score_df.sort_values(by="score")
         best_zone_policy = sorted_scores_df["policy"].values[0]
         best_zone_policy_idx = policy_paths.index(best_zone_policy)
