@@ -372,9 +372,9 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
     log_data_save_path = os.path.join(save_path, "monthly_policy_ranking/")
     if not os.path.exists(log_data_save_path):
         os.makedirs(log_data_save_path)
-    with open(os.path.join(log_data_save_path, "policy_scores_{prev_month_num}.pkl"), "wb+") as f:
+    with open(os.path.join(log_data_save_path, f"policy_scores_{prev_month_num}.pkl"), "wb+") as f:
         pickle.dump(policy_scores, f)
-    with open(os.path.join(log_data_save_path, "additional_data_{prev_month_num}.pkl"), "wb+") as f:
+    with open(os.path.join(log_data_save_path, f"additional_data_{prev_month_num}.pkl"), "wb+") as f:
         pickle.dump(additional_data_dict, f)
 
     return best_estimated_policy_map
