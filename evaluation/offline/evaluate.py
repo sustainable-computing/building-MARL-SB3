@@ -114,6 +114,8 @@ def _get_method(method, log_data, kwargs):
         method_obj = \
             InverseProbabilityWeighting(log_data, no_grad=True)
     elif method == OPEMethodStrings.snip.value:
+        if "log_data" in kwargs:
+            del kwargs["log_data"]
         method_obj = SNIP(log_data, **kwargs)
     elif method == OPEMethodStrings.snipw.value:
         method_obj = SelfNormalizedInverseProbabilityWeighting(log_data)

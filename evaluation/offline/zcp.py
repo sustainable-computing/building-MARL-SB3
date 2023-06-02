@@ -44,17 +44,17 @@ class SNIP(OPEBase):
 
     def calculate_loss(self, use_behavior_policy=True, return_additional=True):
         scaled_rewards, states, rewards, policy_action_prob, behavior_action_prob = \
-            self.ipw_obj.evaluate_policy(self.policy.get_distribution, self.behavior_policy, score="",
+            self.ipw_obj.optimized_evaluate_policy(self.policy.get_distribution, self.behavior_policy, score="",
                                          device=self.device)
 
         # scaled_rewards = -scaled_rewards
-
         discounted_rewards = []
         disc_reward = 0
-        for reward in scaled_rewards.tolist()[::-1]:
+        for reward in scaled_rewards.reshape(-1).tolist()[::-1]:
             disc_reward = reward + (self.gamma * disc_reward)
             discounted_rewards.insert(0, disc_reward)
-        states = torch.stack(states).to(self.device)
+        if isinstance(states, list):
+            states = torch.stack(states).to(self.device)
         state_values = self.policy.mlp_extractor.critic_network(states).squeeze()
         discounted_rewards = torch.tensor(discounted_rewards, dtype=torch.float32, device=self.device)
         discounted_rewards = (discounted_rewards - discounted_rewards.mean()) / (discounted_rewards.std() + 1e-7)
@@ -62,8 +62,8 @@ class SNIP(OPEBase):
         ratios = policy_action_prob / behavior_action_prob
 
         advantages = discounted_rewards - state_values
-        surr_1 = ratios * advantages
-        surr_2 = torch.clamp(ratios, 1.0 - self.eps_clip, 1.0 + self.eps_clip) * advantages
+        surr_1 = ratios * advantages.reshape(-1, 1)
+        surr_2 = torch.clamp(ratios, 1.0 - self.eps_clip, 1.0 + self.eps_clip) * advantages.reshape(-1, 1)
 
         loss = -torch.min(surr_1, surr_2)
         if not return_additional:

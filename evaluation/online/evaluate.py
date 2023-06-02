@@ -291,7 +291,7 @@ def run_full_automated_swapping_simulation(
                 "zone_humidity": cobs_state[f"{zone} humidity"],
                 "zone_temp": cobs_state["temperature"][zone],
                 "zone_occupancy": cobs_state["occupancy"][zone],
-                "action":  actions[i],
+                "action":  actions[i].item(),
                 "reward": rewards[zones.index(zone)],
                 "reward_total_hvac": cobs_state["total hvac"],
             })
@@ -354,6 +354,7 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
             score, additional_data = get_policy_score(ope_method, method_obj,
                                                       policy, behavior_policy,
                                                       return_additional=True)
+            # print(zone, policy_path, score)
             if policy_path not in policy_scores:
                 policy_scores[ope_method][policy_path] = {}
             policy_scores[ope_method][policy_path][zone] = score

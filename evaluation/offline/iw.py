@@ -58,7 +58,7 @@ class InverseProbabilityWeighting(OPEBase):
             state = torch.tensor([row[var] for var in state_vars], device=self.device)
             if self.rule_based_behavior_policy:
                 state_bins = [np.digitize(row[var],
-                            behavior_policy[f"{var}_bins"])-1 for var in state_vars]
+                              behavior_policy[f"{var}_bins"])-1 for var in state_vars]
                 action_bin = np.digitize(row["action"], behavior_policy["action_bins"]) - 1
                 state_bins_str = "{},{},{},{},{},{}".format(*state_bins)
                 if self.no_grad:
@@ -103,6 +103,57 @@ class InverseProbabilityWeighting(OPEBase):
                 return ret_data.mean(), states, rewards, action_prob, behavior_prob
             else:
                 return ret_data, states, rewards, action_prob, behavior_prob
+
+    def optimized_evaluate_policy(self, evaluation_policy_distribution_fuc: callable = None,
+                                  behavior_policy: dict = None,
+                                  score: str = "mean",
+                                  return_additional: bool = True,
+                                  **kwargs):
+        if "device" in kwargs:
+            self.device = kwargs["device"]
+        else:
+            self.device = "cpu"
+
+        state_vars = ["outdoor_temp", "solar_irradiation", "time_hour",
+                      "zone_humidity", "zone_temp", "zone_occupancy"]
+        states = torch.tensor(self.log_data[state_vars].values,
+                              device=self.device,
+                              dtype=torch.float32)
+        actions = torch.tensor(self.log_data["action"].values.reshape(-1, 1),
+                               device=self.device,
+                               dtype=torch.float32)
+        rewards = torch.tensor(self.log_data["reward"].values.reshape(-1, 1),
+                               device=self.device,
+                               dtype=torch.float32)
+
+        if not self.rule_based_behavior_policy:
+            if self.no_grad:
+                with torch.no_grad():
+                    action_dist = evaluation_policy_distribution_fuc(states).distribution
+                    behavior_dist = behavior_policy(states).distribution
+            else:
+                action_dist = evaluation_policy_distribution_fuc(states).distribution
+                behavior_dist = behavior_policy.get_distribution(states).distribution
+
+            action_probs = action_dist.log_prob(self.inv_sigmoid(actions)).exp()
+            behavior_probs = behavior_dist.log_prob(self.inv_sigmoid(actions)).exp()
+        else:
+            raise NotImplementedError("Optimized rule based policy evaluation not implemented yet")
+
+        behavior_probs = torch.clamp(behavior_probs, min=1e-10)
+        iw = action_probs / behavior_probs
+        iw = torch.clamp(iw, 0, 1e4)
+        ret_data = iw * rewards
+        if not return_additional:
+            if score == "mean":
+                return ret_data.mean()
+            else:
+                return ret_data
+        else:
+            if score == "mean":
+                return ret_data.mean(), states, rewards, action_probs, behavior_probs
+            else:
+                return ret_data, states, rewards, action_probs, behavior_probs
 
     def inv_sigmoid(self, value):
         if self.device == "cpu":
