@@ -360,7 +360,7 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
             policy_scores[ope_method][policy_path][zone] = score
             additional_data_dict[ope_method][zone][policy_path] = additional_data
         zone_score_df = convert_score_dict_to_df(policy_scores)[ope_method]
-        print(zone_score_df)
+        # print(zone_score_df)
         sorted_scores_df = zone_score_df.sort_values(by="score")
         best_zone_policy = sorted_scores_df["policy"].values[0]
         best_zone_policy_idx = policy_paths.index(best_zone_policy)
@@ -369,12 +369,12 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
         best_estimated_policy_map[zone]["policy"] = best_zone_policy
         best_estimated_policy_map[zone]["policy_obj"] = best_zone_policy_obj
 
-    log_data_save_path = os.path.join(save_path, f"policy_ranking_{prev_month_num}/")
+    log_data_save_path = os.path.join(save_path, "monthly_policy_ranking/")
     if not os.path.exists(log_data_save_path):
         os.makedirs(log_data_save_path)
-    with open(log_data_save_path, "wb+") as f:
+    with open(os.path.join(log_data_save_path, "policy_scores_{prev_month_num}.pkl"), "wb+") as f:
         pickle.dump(policy_scores, f)
-    with open(log_data_save_path, "wb+") as f:
+    with open(os.path.join(log_data_save_path, "additional_data_{prev_month_num}.pkl"), "wb+") as f:
         pickle.dump(additional_data_dict, f)
 
     return best_estimated_policy_map
