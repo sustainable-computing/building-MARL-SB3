@@ -6,6 +6,7 @@ from evaluation.offline.evaluate import _get_method, get_policy_score
 from policies.utils import load_policy_library, load_policy
 from utils.configs import load_config
 from utils.metrics import convert_score_dict_to_df
+from utils.metrics import _regret_at_k
 
 from datetime import datetime
 import numpy as np
@@ -354,18 +355,19 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
             score, additional_data = get_policy_score(ope_method, method_obj,
                                                       policy, behavior_policy,
                                                       return_additional=True)
-            # print(zone, policy_path, score)
             if policy_path not in policy_scores:
                 policy_scores[policy_path] = {}
             policy_scores[policy_path][zone] = score
             additional_data_dict[ope_method][zone][policy_path] = additional_data
-        zone_score_df = convert_score_dict_to_df({ope_method: policy_scores})[ope_method]
-        # print(zone_score_df)
-        sorted_scores_df = zone_score_df.sort_values(by="score", ascending=False)
-        best_zone_policy = sorted_scores_df["policy"].values[0]
+        estimated_scores = {ope_method: policy_scores}
+
+        best_zone_policy = _get_best_estimated_policy(estimated_scores,
+                                                      ope_method,
+                                                      prev_month_num,
+                                                      zone)
+
         best_zone_policy_idx = policy_paths.index(best_zone_policy)
         best_zone_policy_obj = policies[best_zone_policy_idx]
-
         best_estimated_policy_map[zone]["policy"] = best_zone_policy
         best_estimated_policy_map[zone]["policy_obj"] = best_zone_policy_obj
 
@@ -378,6 +380,45 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
         pickle.dump(additional_data_dict, f)
 
     return best_estimated_policy_map
+
+
+def _get_best_estimated_policy(estimated_scores,
+                               ope_method,
+                               month,
+                               zone,
+                               top_k_selection=True):
+    score_df = convert_score_dict_to_df(estimated_scores)[ope_method]
+    if top_k_selection is False:
+        sorted_scores_df = score_df.sort_values(by="score", ascending=False)
+        best_policy = sorted_scores_df["policy"].values[0]
+    else:
+        gt_month_ranking = _load_brute_force_policy_ranking(month)
+        gt_month_ranking = gt_month_ranking[gt_month_ranking["zone"] == zone]
+        regret, _, best_policy = _regret_at_k(gt_month_ranking, score_df,
+                                              k=5, prediction_sort_ascending=False,
+                                              return_top_k_policies=True)
+        print(month, zone, regret)
+
+    return best_policy
+
+
+def _load_brute_force_policy_ranking(month):
+    one_month_eval_locs = {
+        1: "data/policy_evaluation/monthwise_brute_force_evaluation/evaluation_reports/evaluation_report_AY_m01.csv",
+        2: "data/policy_evaluation/monthwise_brute_force_evaluation/evaluation_reports/evaluation_report_AY_m02.csv",
+        3: "data/policy_evaluation/monthwise_brute_force_evaluation/evaluation_reports/evaluation_report_AY_m03.csv",
+        4: "data/policy_evaluation/monthwise_brute_force_evaluation/evaluation_reports/evaluation_report_AY_m04.csv",
+        5: "data/policy_evaluation/monthwise_brute_force_evaluation/evaluation_reports/evaluation_report_AY_m05.csv",
+        6: "data/policy_evaluation/monthwise_brute_force_evaluation/evaluation_reports/evaluation_report_AY_m06.csv",
+        7: "data/policy_evaluation/monthwise_brute_force_evaluation/evaluation_reports/evaluation_report_AY_m07.csv",
+        8: "data/policy_evaluation/monthwise_brute_force_evaluation/evaluation_reports/evaluation_report_AY_m08.csv",
+        9: "data/policy_evaluation/monthwise_brute_force_evaluation/evaluation_reports/evaluation_report_AY_m09.csv",
+        10: "data/policy_evaluation/monthwise_brute_force_evaluation/evaluation_reports/evaluation_report_AY_m10.csv",
+        11: "data/policy_evaluation/monthwise_brute_force_evaluation/evaluation_reports/evaluation_report_AY_m11.csv",
+        12: "data/policy_evaluation/monthwise_brute_force_evaluation/evaluation_reports/evaluation_report_AY_m12.csv"
+    }
+    df = pd.read_csv(one_month_eval_locs[month])
+    return df
 
 
 def _save_energy_consumptions(save_path, total_energy_consumptions):
@@ -432,4 +473,3 @@ def _create_save_path(save_dir):
 def _save_run_config(save_path, args):
     with open(os.path.join(save_path, "run_config.yaml"), "w") as f:
         yaml.dump(args, f)
-
