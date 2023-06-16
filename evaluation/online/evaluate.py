@@ -266,7 +266,10 @@ def run_full_automated_swapping_simulation(
         actions = []
         month = info["cobs_state"]["time"].month
         if month not in policy_map:
-            policy_map[month] = _estimate_policy_map(month-1, policy_map[month-1],
+            prev_month_num = month-1
+            if prev_month_num == 0:
+                prev_month_num = 12
+            policy_map[month] = _estimate_policy_map(prev_month_num, policy_map[prev_month_num],
                                                      log_data, policy_map_config,
                                                      policy_library_path, policy_type,
                                                      init_policy_log_std,

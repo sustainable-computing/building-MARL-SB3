@@ -116,17 +116,24 @@ class InverseProbabilityWeighting(OPEBase):
 
         state_vars = ["outdoor_temp", "solar_irradiation", "time_hour",
                       "zone_humidity", "zone_temp", "zone_occupancy"]
-        states = torch.tensor(self.log_data[state_vars].values,
-                              device=self.device,
-                              dtype=torch.float32)
-        actions = torch.tensor(self.log_data["action"].values.reshape(-1, 1),
-                               device=self.device,
-                               dtype=torch.float32)
-        rewards = torch.tensor(self.log_data["reward"].values.reshape(-1, 1),
-                               device=self.device,
-                               dtype=torch.float32)
+        # rewards = torch.tensor(self.log_data["reward"].values.reshape(-1, 1),
+        #                        device=self.device,
+        #                        dtype=torch.float32)
+        rewards_1 = torch.tensor(self.log_data["cooling_energy"].values.reshape(-1, 1),
+                                 device=self.device,
+                                 dtype=torch.float32)
+        rewards_2 = torch.tensor(self.log_data["heating_energy"].values.reshape(-1, 1),
+                                 device=self.device,
+                                 dtype=torch.float32)
+        rewards = rewards_1 + rewards_2
 
         if not self.rule_based_behavior_policy:
+            states = torch.tensor(self.log_data[state_vars].values.astype(np.float),
+                                  device=self.device,
+                                  dtype=torch.float32)
+            actions = torch.tensor(self.log_data["action"].values.reshape(-1, 1),
+                                   device=self.device,
+                                   dtype=torch.float32)
             if self.no_grad:
                 with torch.no_grad():
                     action_dist = evaluation_policy_distribution_fuc(states).distribution
@@ -138,7 +145,39 @@ class InverseProbabilityWeighting(OPEBase):
             action_probs = action_dist.log_prob(self.inv_sigmoid(actions)).exp()
             behavior_probs = behavior_dist.log_prob(self.inv_sigmoid(actions)).exp()
         else:
-            raise NotImplementedError("Optimized rule based policy evaluation not implemented yet")
+            # raise NotImplementedError("Optimized rule based policy evaluation not implemented yet")
+            states = torch.tensor(self.log_data[state_vars].values.astype(np.float),
+                                  device=self.device,
+                                  dtype=torch.float32)
+            states_bins = torch.zeros_like(states, device=self.device, dtype=torch.float32)
+            action_bins = torch.tensor(np.digitize(self.log_data["action"].values.round(3),
+                                                    behavior_policy["action_bins"])-1,
+                                        device=self.device,
+                                        dtype=torch.float32).reshape(-1, 1)
+            state_bin_strs = []
+            for i, state_var in enumerate(state_vars):
+                states_bins[:, i] = torch.tensor(np.digitize(states[:, i],
+                                                             behavior_policy[f"{state_var}_bins"])-1,
+                                                 device=self.device,
+                                                 dtype=torch.float32)
+            for i in range(states_bins.shape[0]):
+                state_bin_strs.append("{},{},{},{},{},{}".format(*states_bins[i].numpy().astype(np.int).tolist()))
+            behavior_probs = torch.zeros((states_bins.shape[0], 1), device=self.device,
+                                            dtype=torch.float32)
+            for i, state_bin_str in enumerate(state_bin_strs):
+                if state_bin_str not in behavior_policy:
+                    print(state_bin_str, "not in behavior policy")
+                    behavior_probs[i] = 1
+                else:
+                    behavior_probs[i] = behavior_policy[state_bin_str][action_bins[i].item()] / \
+                        behavior_policy["total_count"]
+            if self.no_grad:
+                with torch.no_grad():
+                    action_dist = evaluation_policy_distribution_fuc(states).distribution
+            else:
+                action_dist = evaluation_policy_distribution_fuc(states).distribution
+            action_probs = self.optimized_calculate_action_probability(action_dist, action_bins,
+                                                                       behavior_policy["action_bins"])
 
         behavior_probs = torch.clamp(behavior_probs, min=1e-10)
         iw = action_probs / behavior_probs
@@ -160,6 +199,23 @@ class InverseProbabilityWeighting(OPEBase):
             return np.log(value / (1 - value))
         else:
             return torch.log(value / (1 - value))
+
+    def optimized_calculate_action_probability(self, dist, bin, action_bins):
+        left_bins = torch.zeros_like(bin)
+        right_bins = torch.zeros_like(bin)
+        bin = bin.numpy().astype(np.int)
+        for i in range(bin.shape[0]):
+            left_sigm_action_bin = action_bins[bin[i].item()]
+            if left_sigm_action_bin == 0:
+                left_bins[i] = -np.inf
+            else:
+                left_bins[i] = self.inv_sigmoid(left_sigm_action_bin)
+            if bin[i] == len(action_bins) - 1:
+                right_bins[i] = np.inf
+            else:
+                right_bins[i] = self.inv_sigmoid(action_bins[bin[i].item()+1])
+        integral = dist.cdf(right_bins) - dist.cdf(left_bins)
+        return integral
 
     def calculate_action_probability(self, dist, bin, action_bins):
         bin_l = self.inv_sigmoid(action_bins[bin])

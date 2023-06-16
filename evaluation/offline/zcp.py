@@ -43,9 +43,14 @@ class SNIP(OPEBase):
             return torch.zeros_like(layer.weight)
 
     def calculate_loss(self, use_behavior_policy=True, return_additional=True):
-        scaled_rewards, states, rewards, policy_action_prob, behavior_action_prob = \
-            self.ipw_obj.optimized_evaluate_policy(self.policy.get_distribution, self.behavior_policy, score="",
-                                         device=self.device)
+        if self.ipw_obj.rule_based_behavior_policy:
+            scaled_rewards, states, rewards, policy_action_prob, behavior_action_prob = \
+                self.ipw_obj.optimized_evaluate_policy(self.policy.get_distribution, self.behavior_policy, score="",
+                                                       device=self.device)
+        else:
+            scaled_rewards, states, rewards, policy_action_prob, behavior_action_prob = \
+                self.ipw_obj.optimized_evaluate_policy(self.policy.get_distribution, self.behavior_policy, score="",
+                                                       device=self.device)
 
         # scaled_rewards = -scaled_rewards
         discounted_rewards = []
