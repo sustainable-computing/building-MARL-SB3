@@ -3,6 +3,7 @@ from buildingenvs import TypeABuilding
 from buildingenvs import DOOEBuilding
 from buildingenvs import FiveZoneBuilding
 from evaluation.offline.evaluate import _get_method, get_policy_score
+from policies.singleagentmetapolicy import SingleAgentMetaPolicy
 from policies.utils import load_policy_library, load_policy
 from utils.configs import load_config
 from utils.metrics import convert_score_dict_to_df
@@ -219,6 +220,8 @@ def run_full_automated_swapping_simulation(
     init_policy_log_std: float = np.log(0.1),
     init_policy_log_std_path: str = "",
     policy_map_config_loc: str = "configs/policymapconfigs/denver/gt_best_one_year_denver.yaml",
+    top_k: int = 5,
+    combining_method: str = "mean",
     save_path: str = "data/policy_evaluation/brute_force/",
     energy_plus_loc: str = "/Applications/EnergyPlus-9-3-0/",
     seed: int = 1337,
@@ -364,15 +367,28 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
             additional_data_dict[ope_method][zone][policy_path] = additional_data
         estimated_scores = {ope_method: policy_scores}
 
-        best_zone_policy = _get_best_estimated_policy(estimated_scores,
-                                                      ope_method,
-                                                      prev_month_num,
-                                                      zone)
+        best_zone_policies = _get_best_estimated_policy(estimated_scores,
+                                                        ope_method,
+                                                        prev_month_num,
+                                                        zone,
+                                                        top_k=kwargs["top_k"])
 
-        best_zone_policy_idx = policy_paths.index(best_zone_policy)
-        best_zone_policy_obj = policies[best_zone_policy_idx]
-        best_estimated_policy_map[zone]["policy"] = best_zone_policy
-        best_estimated_policy_map[zone]["policy_obj"] = best_zone_policy_obj
+        if kwargs["top_k"] == 1:
+            best_zone_policy = best_zone_policies[0]
+            best_zone_policy_idx = policy_paths.index(best_zone_policy)
+            best_zone_policy_obj = policies[best_zone_policy_idx]
+            best_estimated_policy_map[zone]["policy"] = best_zone_policy
+            best_estimated_policy_map[zone]["policy_obj"] = best_zone_policy_obj
+        else:
+            combining_method = kwargs["combining_method"]
+            best_estimated_policy_map[zone]["policy"] = best_zone_policies
+            policy_objects = []
+            for policy_path in best_zone_policies:
+                policy_idx = policy_paths.index(policy_path)
+                policy_obj = policies[policy_idx]
+                policy_objects.append(policy_obj)
+            combined_policy_obj = SingleAgentMetaPolicy(policy_objects, combining_method, device)
+            best_estimated_policy_map[zone]["policy_obj"] = combined_policy_obj
 
     log_data_save_path = os.path.join(save_path, "monthly_policy_ranking/")
     if not os.path.exists(log_data_save_path):
@@ -389,20 +405,24 @@ def _get_best_estimated_policy(estimated_scores,
                                ope_method,
                                month,
                                zone,
-                               top_k_selection=True):
+                               top_k=1):
+    if top_k > 1:
+        top_k_selection = True
+    else:
+        top_k_selection = False
     score_df = convert_score_dict_to_df(estimated_scores)[ope_method]
     if top_k_selection is False:
         sorted_scores_df = score_df.sort_values(by="score", ascending=False)
-        best_policy = sorted_scores_df["policy"].values[0]
+        best_policies = [sorted_scores_df["policy"].values[0]]
     else:
         gt_month_ranking = _load_brute_force_policy_ranking(month)
         gt_month_ranking = gt_month_ranking[gt_month_ranking["zone"] == zone]
-        regret, _, best_policy = _regret_at_k(gt_month_ranking, score_df,
-                                              k=5, prediction_sort_ascending=False,
-                                              return_top_k_policies=True)
+        regret, best_policies, best_policy = _regret_at_k(gt_month_ranking, score_df,
+                                                          k=top_k, prediction_sort_ascending=False,
+                                                          return_top_k_policies=True)
         print(month, zone, regret)
 
-    return best_policy
+    return best_policies
 
 
 def _load_brute_force_policy_ranking(month):

@@ -91,6 +91,8 @@ def run_full_sim(
     init_policy_log_std: float = typer.Option(np.log(0.1)),
     init_policy_log_std_path: str = typer.Option(""),
     policy_map_config_loc: str = "configs/policymapconfigs/denver/gt_best_one_year_denver.yaml",
+    top_k: int = typer.Option(5),
+    combining_method: str = typer.Option("mean"),
     energy_plus_loc: str = typer.Option(...),
     save_path: str = typer.Option("data/policy_map_full_sim/"),
     seed: int = typer.Option(1337),

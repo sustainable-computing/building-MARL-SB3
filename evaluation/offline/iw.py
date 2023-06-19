@@ -116,16 +116,16 @@ class InverseProbabilityWeighting(OPEBase):
 
         state_vars = ["outdoor_temp", "solar_irradiation", "time_hour",
                       "zone_humidity", "zone_temp", "zone_occupancy"]
-        # rewards = torch.tensor(self.log_data["reward"].values.reshape(-1, 1),
-        #                        device=self.device,
-        #                        dtype=torch.float32)
-        rewards_1 = torch.tensor(self.log_data["cooling_energy"].values.reshape(-1, 1),
-                                 device=self.device,
-                                 dtype=torch.float32)
-        rewards_2 = torch.tensor(self.log_data["heating_energy"].values.reshape(-1, 1),
-                                 device=self.device,
-                                 dtype=torch.float32)
-        rewards = rewards_1 + rewards_2
+        rewards = torch.tensor(self.log_data["reward"].values.reshape(-1, 1),
+                               device=self.device,
+                               dtype=torch.float32)
+        # rewards_1 = torch.tensor(self.log_data["cooling_energy"].values.reshape(-1, 1),
+        #                          device=self.device,
+        #                          dtype=torch.float32)
+        # rewards_2 = torch.tensor(self.log_data["heating_energy"].values.reshape(-1, 1),
+        #                          device=self.device,
+        #                          dtype=torch.float32)
+        # rewards = rewards_1 + rewards_2
 
         if not self.rule_based_behavior_policy:
             states = torch.tensor(self.log_data[state_vars].values.astype(np.float),
@@ -167,6 +167,9 @@ class InverseProbabilityWeighting(OPEBase):
             for i, state_bin_str in enumerate(state_bin_strs):
                 if state_bin_str not in behavior_policy:
                     print(state_bin_str, "not in behavior policy")
+                    behavior_probs[i] = 1
+                elif action_bins[i].item() not in behavior_policy[state_bin_str]:
+                    print(action_bins[i].item(), "not in behavior policy with state", state_bin_str)
                     behavior_probs[i] = 1
                 else:
                     behavior_probs[i] = behavior_policy[state_bin_str][action_bins[i].item()] / \
