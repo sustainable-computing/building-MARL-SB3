@@ -79,7 +79,7 @@ def run_full_sim(
 
 
 @app.command("run-full-automated-swapping-simulation")
-def run_full_sim(
+def run_full_sim_autoswap(
     building_env: BuildingEnvStrings = typer.Option(
                 BuildingEnvStrings.denver.value,
                 help="The building environment to train agents on"),
@@ -91,6 +91,7 @@ def run_full_sim(
     init_policy_log_std: float = typer.Option(np.log(0.1)),
     init_policy_log_std_path: str = typer.Option(""),
     policy_map_config_loc: str = "configs/policymapconfigs/denver/gt_best_one_year_denver.yaml",
+    reward_signal: str = "standard",
     top_k: int = typer.Option(5),
     combining_method: str = typer.Option("mean"),
     energy_plus_loc: str = typer.Option(...),

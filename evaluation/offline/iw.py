@@ -116,16 +116,20 @@ class InverseProbabilityWeighting(OPEBase):
 
         state_vars = ["outdoor_temp", "solar_irradiation", "time_hour",
                       "zone_humidity", "zone_temp", "zone_occupancy"]
-        rewards = torch.tensor(self.log_data["reward"].values.reshape(-1, 1),
-                               device=self.device,
-                               dtype=torch.float32)
-        # rewards_1 = torch.tensor(self.log_data["cooling_energy"].values.reshape(-1, 1),
-        #                          device=self.device,
-        #                          dtype=torch.float32)
-        # rewards_2 = torch.tensor(self.log_data["heating_energy"].values.reshape(-1, 1),
-        #                          device=self.device,
-        #                          dtype=torch.float32)
-        # rewards = rewards_1 + rewards_2
+        if kwargs["reward_signal"] == "standard":
+            rewards = torch.tensor(self.log_data["reward"].values.reshape(-1, 1),
+                                   device=self.device,
+                                   dtype=torch.float32)
+        elif kwargs["reward_signal"] == "heating+cooling":
+            rewards_1 = torch.tensor(self.log_data["cooling_energy"].values.reshape(-1, 1),
+                                     device=self.device,
+                                     dtype=torch.float32)
+            rewards_2 = torch.tensor(self.log_data["heating_energy"].values.reshape(-1, 1),
+                                     device=self.device,
+                                     dtype=torch.float32)
+            rewards = rewards_1 + rewards_2
+        else:
+            raise NotImplementedError(f"Reward signal {kwargs['reward_signal']} not implemented yet")
 
         if not self.rule_based_behavior_policy:
             states = torch.tensor(self.log_data[state_vars].values.astype(np.float),

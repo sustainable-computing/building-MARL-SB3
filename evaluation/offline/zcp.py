@@ -42,15 +42,17 @@ class SNIP(OPEBase):
         else:
             return torch.zeros_like(layer.weight)
 
-    def calculate_loss(self, use_behavior_policy=True, return_additional=True):
+    def calculate_loss(self, use_behavior_policy=True, return_additional=True, **kwargs):
         if self.ipw_obj.rule_based_behavior_policy:
             scaled_rewards, states, rewards, policy_action_prob, behavior_action_prob = \
                 self.ipw_obj.optimized_evaluate_policy(self.policy.get_distribution, self.behavior_policy, score="",
-                                                       device=self.device)
+                                                       device=self.device,
+                                                       reward_signal=kwargs["reward_signal"])
         else:
             scaled_rewards, states, rewards, policy_action_prob, behavior_action_prob = \
                 self.ipw_obj.optimized_evaluate_policy(self.policy.get_distribution, self.behavior_policy, score="",
-                                                       device=self.device)
+                                                       device=self.device,
+                                                       reward_signal=kwargs["reward_signal"])
 
         # scaled_rewards = -scaled_rewards
         discounted_rewards = []
@@ -94,11 +96,13 @@ class SNIP(OPEBase):
 
         self.policy.mlp_extractor.zero_grad()
         if not return_additional:
-            loss = self.calculate_loss(self.log_data, return_additional=return_additional)
+            loss = self.calculate_loss(self.log_data, return_additional=return_additional,
+                                       reward_signal=kwargs["reward_signal"])
         else:
             loss, scaled_rewards, states, rewards,\
                 policy_action_prob, behavior_action_prob = \
-                    self.calculate_loss(self.log_data, return_additional=return_additional)
+                    self.calculate_loss(self.log_data, return_additional=return_additional,
+                                        reward_signal=kwargs["reward_signal"])
         loss.mean().backward()
 
         metric_array = []

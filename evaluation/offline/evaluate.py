@@ -145,7 +145,8 @@ def get_policy_score(method: str,
                      method_obj: object,
                      policy: object,
                      behavior_policy: object,
-                     return_additional: bool = True):
+                     return_additional: bool = True,
+                     **kwargs):
 
     additional_data = {}
 
@@ -170,10 +171,16 @@ def get_policy_score(method: str,
         additional_data["behavior_probs"] = behavior_probs.detach().numpy()
 
     elif method == "snip":
+        if "reward_signal" not in kwargs:
+            print("Reward signal not provided. Using standard reward signal.")
+            reward_signal = "standard"
+        else:
+            reward_signal = kwargs["reward_signal"]
         score, losses, scaled_rewards, states, rewards, action_probs, behavior_probs = \
             method_obj.evaluate_policy(evaluation_policy=policy,
                                        behavior_policy=behavior_policy,
-                                       return_additional=True)
+                                       return_additional=True,
+                                       reward_signal=reward_signal)
         additional_data["losses"] = losses.detach().numpy()
         additional_data["scaled_rewards"] = scaled_rewards.detach().numpy()
         additional_data["action_probs"] = action_probs.detach().numpy()

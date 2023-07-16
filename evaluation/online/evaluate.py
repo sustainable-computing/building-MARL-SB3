@@ -206,6 +206,8 @@ def run_full_simulation(
                 "action":  cobs_state[f"{zone} position"],
                 "reward": rewards[zones.index(zone)],
                 "reward_total_hvac": cobs_state["total hvac"],
+                "cooling_energy": cobs_state[f"{zone} Air System Sensible Cooling Energy"],
+                "heating_energy": cobs_state[f"{zone} Air System Sensible Heating Energy"],
             })
     total_energy_consumptions[zone] = env.total_energy_consumption
     _save_energy_consumptions(save_path, total_energy_consumptions)
@@ -222,6 +224,7 @@ def run_full_automated_swapping_simulation(
     policy_map_config_loc: str = "configs/policymapconfigs/denver/gt_best_one_year_denver.yaml",
     top_k: int = 5,
     combining_method: str = "mean",
+    reward_signal: str = "standard",
     save_path: str = "data/policy_evaluation/brute_force/",
     energy_plus_loc: str = "/Applications/EnergyPlus-9-3-0/",
     seed: int = 1337,
@@ -301,6 +304,8 @@ def run_full_automated_swapping_simulation(
                 "action":  actions[i].item(),
                 "reward": rewards[zones.index(zone)],
                 "reward_total_hvac": cobs_state["total hvac"],
+                "cooling_energy": cobs_state[f"{zone} Air System Sensible Cooling Energy"],
+                "heating_energy": cobs_state[f"{zone} Air System Sensible Heating Energy"]
             })
     total_energy_consumptions[zone] = env.total_energy_consumption
     _save_energy_consumptions(save_path, total_energy_consumptions)
@@ -360,7 +365,8 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
         for policy, policy_path in tqdm.tqdm(zip(policies, policy_paths), total=len(policies)):
             score, additional_data = get_policy_score(ope_method, method_obj,
                                                       policy, behavior_policy,
-                                                      return_additional=True)
+                                                      return_additional=True,
+                                                      reward_signal=kwargs["reward_signal"])
             if policy_path not in policy_scores:
                 policy_scores[policy_path] = {}
             policy_scores[policy_path][zone] = score
