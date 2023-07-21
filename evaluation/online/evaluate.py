@@ -373,11 +373,25 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
             additional_data_dict[ope_method][zone][policy_path] = additional_data
         estimated_scores = {ope_method: policy_scores}
 
-        best_zone_policies = _get_best_estimated_policy(estimated_scores,
-                                                        ope_method,
-                                                        prev_month_num,
-                                                        zone,
-                                                        top_k=kwargs["top_k"])
+        return_best_policy = False
+        if "combining_method" in kwargs:
+            combining_method = kwargs["combining_method"]
+            if combining_method == "oracle":
+                return_best_policy = True
+
+        if return_best_policy:
+            best_zone_policies, best_zone_policy = _get_best_estimated_policy(estimated_scores,
+                                                                              ope_method,
+                                                                              prev_month_num,
+                                                                              zone,
+                                                                              top_k=kwargs["top_k"],
+                                                                              return_best_policy=return_best_policy)
+        else:
+            best_zone_policies = _get_best_estimated_policy(estimated_scores,
+                                                            ope_method,
+                                                            prev_month_num,
+                                                            zone,
+                                                            top_k=kwargs["top_k"])
 
         if kwargs["top_k"] == 1:
             best_zone_policy = best_zone_policies[0]
@@ -387,14 +401,20 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
             best_estimated_policy_map[zone]["policy_obj"] = best_zone_policy_obj
         else:
             combining_method = kwargs["combining_method"]
-            best_estimated_policy_map[zone]["policy"] = best_zone_policies
-            policy_objects = []
-            for policy_path in best_zone_policies:
-                policy_idx = policy_paths.index(policy_path)
-                policy_obj = policies[policy_idx]
-                policy_objects.append(policy_obj)
-            combined_policy_obj = SingleAgentMetaPolicy(policy_objects, combining_method, device)
-            best_estimated_policy_map[zone]["policy_obj"] = combined_policy_obj
+            if combining_method == "oracle":
+                best_zone_policy_idx = policy_paths.index(best_zone_policy)
+                best_zone_policy_obj = policies[best_zone_policy_idx]
+                best_estimated_policy_map[zone]["policy"] = best_zone_policy
+                best_estimated_policy_map[zone]["policy_obj"] = best_zone_policy_obj
+            else:
+                best_estimated_policy_map[zone]["policy"] = best_zone_policies
+                policy_objects = []
+                for policy_path in best_zone_policies:
+                    policy_idx = policy_paths.index(policy_path)
+                    policy_obj = policies[policy_idx]
+                    policy_objects.append(policy_obj)
+                combined_policy_obj = SingleAgentMetaPolicy(policy_objects, combining_method, device)
+                best_estimated_policy_map[zone]["policy_obj"] = combined_policy_obj
 
     log_data_save_path = os.path.join(save_path, "monthly_policy_ranking/")
     if not os.path.exists(log_data_save_path):
@@ -411,7 +431,8 @@ def _get_best_estimated_policy(estimated_scores,
                                ope_method,
                                month,
                                zone,
-                               top_k=1):
+                               top_k=1,
+                               return_best_policy=False):
     if top_k > 1:
         top_k_selection = True
     else:
@@ -427,6 +448,8 @@ def _get_best_estimated_policy(estimated_scores,
                                                           k=top_k, prediction_sort_ascending=False,
                                                           return_top_k_policies=True)
         print(month, zone, regret)
+        if return_best_policy:
+            return best_policies, best_policy
 
     return best_policies
 
