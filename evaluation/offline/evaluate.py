@@ -29,6 +29,7 @@ def evaluate(methods: List[str] = ["ipw"],
              start_year: List[int] = [2019],
              use_behavior_p_score: bool = True,
              behavior_policy_path: str = "data/rule_based_log_data/denver/action_probs_all_data.pkl",
+             reward_signal: str = "standard",
              save_path: str = "data/policy_evaluation/ope/",
              parallelize: bool = False,
              max_cpu_cores: int = 1,
@@ -87,7 +88,8 @@ def evaluate(methods: List[str] = ["ipw"],
 
                 score, additional_data = get_policy_score(method, method_obj,
                                                           policy, behavior_policy,
-                                                          return_additional=True)
+                                                          return_additional=True,
+                                                          reward_signal=reward_signal)
                 if method not in policy_scores:
                     policy_scores[method] = {}
                 if method not in all_additional_data:

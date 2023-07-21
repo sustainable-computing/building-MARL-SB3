@@ -38,6 +38,7 @@ def evaluate_ope(methods: List[OPEMethodStrings] = typer.Option(
                  start_year: List[int] = typer.Option([1991]),
                  use_behavior_p_score: bool = typer.Option(...),
                  behavior_policy_path: str = typer.Option(""),
+                 reward_signal: str = typer.Option("standard"),
                  save_path: str = typer.Option("data/policy_evaluation/ope/"),
                  parallelize: bool = typer.Option(False),
                  max_cpu_cores: int = typer.Option(1),
