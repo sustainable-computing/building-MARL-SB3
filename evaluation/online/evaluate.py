@@ -238,6 +238,10 @@ def run_full_automated_swapping_simulation(
         "Automated swapping simulation only takes in one month assignment" \
         "cannot assign policies for multiple months"
 
+    if combining_method in ["ucb"]:
+        assert "ucb_reward_limits" in policy_map_config, \
+            "ucb_reward_limits must be specified in policy map config"
+
     starting_month = list(policy_map_config["zone_policy_map"].keys())[0]
     assert starting_month in range(1, 13), \
         "Starting month must be between 1 and 12"
@@ -289,6 +293,13 @@ def run_full_automated_swapping_simulation(
             actions.append(policy_action)
         actions = th.tensor(actions, device=device)
         state, rewards, _, info = env.step(actions)
+
+        if combining_method in ["ucb"]:
+            for zone in zones:
+                policy = policy_map[month][zone]["policy_obj"]
+                if type(policy) == SingleAgentMetaPolicy:
+                    policy.policy_combiner.set_arm_reward(rewards[zones.index(zone)])
+
         cobs_state = info["cobs_state"]
         for i, zone in enumerate(zones):
             log_data.append({
@@ -413,7 +424,11 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
                     policy_idx = policy_paths.index(policy_path)
                     policy_obj = policies[policy_idx]
                     policy_objects.append(policy_obj)
-                combined_policy_obj = SingleAgentMetaPolicy(policy_objects, combining_method, device)
+                if combining_method == "ucb":
+                    extra_args = {"zone": zone,
+                                  "policy_map_config": kwargs["policy_map_config"]}
+                combined_policy_obj = SingleAgentMetaPolicy(policy_objects, combining_method,
+                                                            device, **extra_args)
                 best_estimated_policy_map[zone]["policy_obj"] = combined_policy_obj
 
     log_data_save_path = os.path.join(save_path, "monthly_policy_ranking/")
