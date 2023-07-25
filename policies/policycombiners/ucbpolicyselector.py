@@ -65,7 +65,12 @@ class UCBPolicyCombiner(PolicyCombinersBase):
                 sum_arm_reward = np.sum(arm_reward_buffer)
                 normalized_arm_reward = (-sum_arm_reward - self.min_reward) / (self.max_reward - self.min_reward)
                 if normalized_arm_reward < 0 or normalized_arm_reward > 1:
-                    raise ValueError("Normalized arm reward out of bounds")
+                    print(f"sum_arm_reward, normalized_arm_reward, self.min_reward: {sum_arm_reward, normalized_arm_reward, self.min_reward}")
+                    if normalized_arm_reward < 0:
+                        normalized_arm_reward = 0
+                    elif normalized_arm_reward > 1:
+                        normalized_arm_reward = 1
+                    # raise ValueError("Normalized arm reward out of bounds")
                 self.arm_scores_all[arm_idx].append(-normalized_arm_reward)
                 self.arm_scores[arm_idx] = np.mean(self.arm_scores_all[arm_idx])
 
