@@ -162,9 +162,9 @@ def run_full_simulation(
             else:
                 raise ValueError(f"Policy map config does not contain month {month}")
 
-    kwargs = locals()
     set_random_seed(seed)
     save_path = _create_save_path(save_path)
+    kwargs = locals()
     _save_run_config(save_path, kwargs)
 
     policy_map = load_policy_map(policy_map, device)
@@ -251,9 +251,9 @@ def run_full_automated_swapping_simulation(
         f"Policy map config for month {starting_month} does not contain all zones"
     policy_map[starting_month] = month_map_config
 
-    kwargs = locals()
     set_random_seed(seed)
     save_path = _create_save_path(save_path)
+    kwargs = locals()
     _save_run_config(save_path, kwargs)
 
     policy_map = load_policy_map(policy_map, device)
@@ -298,6 +298,11 @@ def run_full_automated_swapping_simulation(
             for zone in zones:
                 policy = policy_map[month][zone]["policy_obj"]
                 if type(policy) == SingleAgentMetaPolicy:
+                    if reward_signal == "standard":
+                        reward = rewards[zones.index(zone)]
+                    elif reward_signal == "heating+cooling":
+                        reward = -(info["cobs_state"][f"{zone} Air System Sensible Cooling Energy"] + \
+                                   info["cobs_state"][f"{zone} Air System Sensible Heating Energy"])
                     policy.policy_combiner.set_arm_reward(rewards[zones.index(zone)])
 
         cobs_state = info["cobs_state"]
@@ -426,7 +431,10 @@ def _estimate_policy_map(prev_month_num, prev_policy_map,
                     policy_objects.append(policy_obj)
                 if combining_method == "ucb":
                     extra_args = {"zone": zone,
-                                  "policy_map_config": kwargs["policy_map_config"]}
+                                  "policy_map_config": kwargs["policy_map_config"],
+                                  "save_path": kwargs["save_path"],
+                                  "prev_month_num": prev_month_num,
+                                  "policy_paths": best_zone_policies}
                 combined_policy_obj = SingleAgentMetaPolicy(policy_objects, combining_method,
                                                             device, **extra_args)
                 best_estimated_policy_map[zone]["policy_obj"] = combined_policy_obj
