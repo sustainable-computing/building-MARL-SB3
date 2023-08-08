@@ -1,4 +1,7 @@
 from algorithms.distributions.diaggaussian import MultiAgentDiagGaussianDistribution
+from policies.utils.loadpolicy import load_policy
+from utils.configs import load_config
+from collections import OrderedDict
 
 import gym
 import numpy as np
@@ -77,6 +80,8 @@ class MultiAgentACPolicy(ActorCriticPolicy):
                  net_arch: Optional[List[Union[int, Dict[str, List[int]]]]] = None,
                  activation_fn: Type[nn.Module] = nn.Tanh,
                  device: th.device = th.device("cpu"),
+                 retrain: bool = False,
+                 policy_map_config_loc: str = None,
                  *args,
                  **kwargs):
         self.control_zones = control_zones
@@ -95,6 +100,46 @@ class MultiAgentACPolicy(ActorCriticPolicy):
         self.features_dim = observation_space[self.control_zones[0]].shape[0]
 
         self._rebuild(lr_schedule)
+
+        if retrain:
+            assert policy_map_config_loc is not None,\
+                "Policy map config location must be provided for retraining."
+            self.retrain = True
+            policy_map_config = load_config(policy_map_config_loc)
+
+            self.zone_policy_locs = {}
+            self.zone_policy_log_std = {}
+
+            zone_policy_map = policy_map_config["zone_policy_map"][list(policy_map_config["zone_policy_map"].keys())[0]]
+            for zone in self.control_zones:
+                assert zone in zone_policy_map.keys(),\
+                    f"Zone {zone} not found in policy map config."
+                self.zone_policy_locs[zone] = zone_policy_map[zone]["policy"]
+                self.zone_policy_log_std[zone] = zone_policy_map[zone]["init_log_std"]
+
+            self._load_policies()
+            self.action_net, self.log_std = self.action_dist.proba_distribution_net(
+                latent_dim=self.mlp_extractor.latent_dim_pi, log_std_init=zone_policy_map[zone]["init_log_std"]
+            )
+
+    def _load_policies(self):
+        for zone in self.control_zones:
+            policy, _, _, _, init_log_std, _ = \
+                load_policy(self.zone_policy_locs[zone], "single_agent_ac",
+                            init_log_std=self.zone_policy_log_std[zone],
+                            eval_mode=False,
+                            device=self.train_device,
+                            init_policy=False)
+            policy_keys = sorted(list(policy.keys()))
+            actor_state_dict = OrderedDict()
+            critic_state_dict = OrderedDict()
+            for key in policy_keys:
+                if "actor" in key:
+                    actor_state_dict[key.replace("actor_network.", "")] = policy[key]
+                elif "critic" in key:
+                    critic_state_dict[key.replace("critic_network.", "")] = policy[key]
+            self.mlp_extractor.actor_networks[zone].load_state_dict(actor_state_dict)
+            self.mlp_extractor.critic_networks[zone].load_state_dict(critic_state_dict)
 
     def _build_mlp_extractor(self) -> None:
         self.features_dim = self.observation_space[self.control_zones[0]].shape[0]

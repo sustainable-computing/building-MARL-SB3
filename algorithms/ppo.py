@@ -33,6 +33,10 @@ class MultiAgentPPO(PPO):
         else:
             self.diverse_training = False
 
+        if "retrain" in kwargs:
+            self.retrain = kwargs["retrain"]
+            assert "policy_map_config" in kwargs, "Must pass policy_map_config when retraining"
+
     def _setup_model(self) -> None:
 
         self._setup_lr_schedule()

@@ -25,7 +25,8 @@ def load_policy(policy_path,
                 init_log_std: float = np.log(0.1),
                 init_log_std_path: str = "",
                 eval_mode: bool = True,
-                device="cpu"):
+                device="cpu",
+                init_policy=True):
     policy = th.load(policy_path, map_location=th.device(device))
     if "actor_network" in policy.keys():
         assert init_log_std_path != "",\
@@ -52,6 +53,9 @@ def load_policy(policy_path,
                 policy[key.replace("actor", "actor_network")] = policy.pop(key)
             elif "critic" in key:
                 policy[key.replace("critic", "critic_network")] = policy.pop(key)
+
+    if init_policy is False:
+        return policy, policy_type, obs_size, action_size, init_log_std, device
 
     policy = initialize_policy(policy, policy_type, obs_size, action_size, init_log_std, device)
     if eval_mode:
