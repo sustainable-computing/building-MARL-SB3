@@ -53,7 +53,7 @@ def get_env(building_env, building_config_loc,
     else:
         raise ValueError("Building environment not supported")
 
-    env.set_runperiod(args["num_train_days"], args["train_year"], args["train_month"], args["train_day"])
+    env.set_runperiod(args["run_period"], args["train_year"], args["train_month"], args["train_day"])
     env.set_timestep(config["timesteps_per_hour"])
     return env, config
 
@@ -164,6 +164,7 @@ def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
 
     retrain=False
     policy_map_config_loc = None
+    run_period = num_train_days
     kwargs = locals()
     set_random_seed(kwargs["seed"], using_cuda="cuda" in kwargs["device"])
 
@@ -216,6 +217,7 @@ def retrain_policies(
         train_month: int = 1,
         train_day: int = 1,
         num_train_days: int = 30,
+        run_period: int = 356,
         model_save_freq: int = 2880,
         policy_map_config_loc: str = "data/policy_map.json",
         normalize_advantage: bool = False,
@@ -233,6 +235,7 @@ def retrain_policies(
         retrain=True
 ):
     kwargs = locals()
+
     set_random_seed(kwargs["seed"], using_cuda="cuda" in kwargs["device"])
 
     log_dir, model_dir = get_log_dirs(kwargs["log_dir"], kwargs["run_name"])
@@ -259,7 +262,7 @@ def retrain_policies(
     if torch_compile:
         model = th.compile(model)
 
-    total_timesteps = kwargs["num_episodes"] * config["timesteps_per_hour"] * 24 * kwargs["num_train_days"]
+    total_timesteps = kwargs["num_episodes"] * config["timesteps_per_hour"] * 24 * kwargs["run_period"]
     model.learn(total_timesteps=total_timesteps, progress_bar=True, callback=callbacks,
                 tb_log_name=kwargs["run_name"])
     model.save(os.path.join(model_dir, "final_model"))
