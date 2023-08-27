@@ -19,6 +19,7 @@ def train_optimal(
     train_month: int = typer.Option(1, help="The month to train on"),
     train_day: int = typer.Option(1, help="The day to train on"),
     num_train_days: int = typer.Option(30, help="The number of days to train on"),
+    reward_signal: str = typer.Option("standard"),
     model_save_freq: int = typer.Option(2880, help="The frequency to save the model"),
     normalize_advantage: bool = typer.Option(False,
                                              help="Whether to normalize the calculated advantage"),
