@@ -11,8 +11,9 @@ class DOOEBuilding(Building):
                  config: dict,
                  log_dir: str,
                  energy_plus_dir: str,
-                 logger: object = None):
-        super().__init__(config=config, log_dir=log_dir)
+                 logger: object = None,
+                 reward_signal: str = "standard"):
+        super().__init__(config=config, log_dir=log_dir, reward_signal=reward_signal)
 
         Model.set_energyplus_folder(energy_plus_dir)
 
@@ -25,6 +26,7 @@ class DOOEBuilding(Building):
                                          high=np.array([np.inf]*len(self.observations)))
                         for zone in self.control_zones
                        })
+
 
         self.init_model()
 

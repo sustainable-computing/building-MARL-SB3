@@ -45,11 +45,11 @@ def get_env(building_env, building_config_loc,
         building_env = building_env.value
 
     if building_env in ["denver", "sf"]:
-        env = TypeABuilding(config, log_dir, energy_plus_loc, logger)
+        env = TypeABuilding(config, log_dir, energy_plus_loc, logger, args["reward_signal"])
     elif building_env == "dooe":
-        env = DOOEBuilding(config, log_dir, energy_plus_loc, logger)
+        env = DOOEBuilding(config, log_dir, energy_plus_loc, logger, args["reward_signal"])
     elif building_env == "five_zone":
-        env = FiveZoneBuilding(config, log_dir, energy_plus_loc, logger)
+        env = FiveZoneBuilding(config, log_dir, energy_plus_loc, logger, args["reward_signal"])
     else:
         raise ValueError("Building environment not supported")
 
@@ -142,6 +142,7 @@ def train(building_env: BuildingEnvStrings = BuildingEnvStrings.denver,
           train_year: int = 1991,
           train_month: int = 1,
           train_day: int = 1,
+          reward_signal: str = "standard",
           num_train_days: int = 30,
           model_save_freq: int = 2880,
           normalize_advantage: bool = False,

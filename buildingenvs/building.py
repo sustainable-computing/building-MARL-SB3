@@ -4,7 +4,10 @@ import torch as th
 
 
 class Building(gym.Env):
-    def __init__(self, config: dict, log_dir: str, **kwargs):
+    def __init__(self, config: dict,
+                 log_dir: str,
+                 reward_signal: str = "standard",
+                 **kwargs):
         super(Building, self).__init__(**kwargs)
 
         self.name = config["building_name"]
@@ -26,6 +29,10 @@ class Building(gym.Env):
             self.airloops = config["airloops"]
 
         self.log_dir = log_dir
+
+        assert reward_signal in ["standard", "heating+cooling"], \
+            "Reward signal must be either 'standard' or 'heating+cooling'"
+        self.reward_signal = reward_signal
 
     def set_runperiod(self, days: int, start_year: int, start_month: int,
                       start_day: int, specify_year: bool = False):

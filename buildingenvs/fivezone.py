@@ -11,8 +11,9 @@ class FiveZoneBuilding(Building):
                  config: dict,
                  log_dir: str,
                  energy_plus_dir: str,
-                 logger: object = None):
-        super().__init__(config, log_dir)
+                 logger: object = None,
+                 reward_signal: str = "standard"):
+        super().__init__(config, log_dir, reward_signal)
 
         Model.set_energyplus_folder(energy_plus_dir)
 
@@ -125,7 +126,12 @@ class FiveZoneBuilding(Building):
         zonewise_state = self.get_state_dict(state)
         self.total_energy_consumption += state["total hvac"]
         self.current_obs_timestep = state["timestep"]
-        rewards = np.array([-state[f"{zone} vav energy"] for zone in self.control_zones])
+        if self.reward_signal == "standard":
+            rewards = np.array([-state[f"{zone} vav energy"] for zone in self.control_zones])
+        elif self.reward_signal == "heating+cooling":
+            rewards = np.array([-state[f"{zone} Air System Sensible Heating Energy"] -
+                                state[f"{zone} Air System Sensible Cooling Energy"]
+                                for zone in self.control_zones])
         # rewards = np.array([-state["total hvac"] for zone in self.control_zones])
         done = self.model.is_terminate()
         info = {
