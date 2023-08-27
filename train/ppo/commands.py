@@ -108,6 +108,7 @@ def retrain(
     train_day: int = typer.Option(1, help="The day to train on"),
     num_train_days: int = typer.Option(
         30, help="The number of days to train on"),
+    run_period: int = typer.Option(365, help="The number of days to run the simulation for"),
     policy_map_config_loc: str = typer.Option("data/policy_map.json",
                                               help="The location of the policy map"),
     model_save_freq: int = typer.Option(2880, help="The frequency to save the model"),

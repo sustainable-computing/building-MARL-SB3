@@ -233,7 +233,8 @@ def retrain_policies(
         wandb_project_name: str = "ppo-train",
         wandb_run_name: str = "",
         torch_compile: bool = False,
-        retrain=True
+        retrain=True,
+        **kwargs
 ):
     kwargs = locals()
 

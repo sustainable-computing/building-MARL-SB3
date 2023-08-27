@@ -464,6 +464,9 @@ def _get_best_estimated_policy(estimated_scores,
     if top_k_selection is False:
         sorted_scores_df = score_df.sort_values(by="score", ascending=False)
         best_policies = [sorted_scores_df["policy"].values[0]]
+        if return_best_policy:
+            best_policy = sorted_scores_df["policy"].values[0]
+            return best_policies, best_policy
     else:
         gt_month_ranking = _load_brute_force_policy_ranking(month)
         gt_month_ranking = gt_month_ranking[gt_month_ranking["zone"] == zone]
