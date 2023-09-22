@@ -4,6 +4,9 @@ import torch as th
 
 
 class MultiAgentDiagGaussianDistribution(DiagGaussianDistribution):
+    """Re-implementation of DiagGaussianDistribution to support multi-dim action space
+
+    """
     def proba_distribution(self, mean_actions: th.Tensor, log_std: th.Tensor):
         """
         Create the distribution given its parameters (mean, std)

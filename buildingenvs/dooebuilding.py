@@ -7,6 +7,12 @@ from cobs import Model
 
 
 class DOOEBuilding(Building):
+    """A class for the DOOE building environment
+
+    Methods in this class interact with cobs to run the simulation and
+    return the state, reward, and done signal.
+    """
+
     def __init__(self,
                  config: dict,
                  log_dir: str,
@@ -27,12 +33,16 @@ class DOOEBuilding(Building):
                         for zone in self.control_zones
                        })
 
-
         self.init_model()
 
         self.total_energy_consumption = 0
 
     def init_model(self):
+        """Initialize the cobs model
+
+        This method specifies the features that need to be tracked during the
+        simulation.
+        """
         additional_states = self.get_additional_states()
         self.model = Model(idf_file_name=self.idf_file_name,
                            weather_file=self.weather_loc,
@@ -63,6 +73,8 @@ class DOOEBuilding(Building):
                                             })
 
     def get_additional_states(self) -> dict:
+        """Get additional states to be tracked by cobs
+        """
         additional_states = {("Zone Air Relative Humidity", zone): f"{zone} humidity"
                              for zone in self.available_zones}
         additional_states.update({

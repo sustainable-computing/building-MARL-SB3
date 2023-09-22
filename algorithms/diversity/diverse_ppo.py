@@ -7,6 +7,16 @@ from typing import List
 
 
 class PPODiversityHandler(BaseDiversity):
+    """ PPO diversity handler
+
+    Attributes:
+        diversity_weight (float): Weight for diversity loss
+        diverse_policies (List(str)): List of diverse policies
+        diverse_policy_paths (List(str)): List of paths to diverse policies
+        diverse_policy_library_log_std_loc (str): Path to log std file for diverse policy library
+        device (str): Device to use for diversity loss calculation
+            retrieved from kwargs if present, else defaults to "cpu"
+    """
     def __init__(self,
                  diversity_weight: float = 0.0,
                  diverse_policies: List[str] = [],
@@ -27,6 +37,14 @@ class PPODiversityHandler(BaseDiversity):
         self.load_diverse_policies(self.device)
 
     def load_diverse_policies(self, device="cpu"):
+        """ Load diverse policies from policy library
+
+        Replaces self.diverse_policies and self.diverse_policy_paths with
+        loaded policies and paths
+
+        Args:
+            device (str): Device to use for diversity loss calculation
+        """
         policies, policy_paths = load_policy_library(self.diverse_policies,
                                                      PolicyTypeStrings.single_agent_ac,
                                                      init_log_std_path=self.diverse_policy_library_log_std_loc,
@@ -39,6 +57,22 @@ class PPODiversityHandler(BaseDiversity):
                                  action: th.Tensor,
                                  returns: th.Tensor,
                                  log_prob: th.Tensor):
+        """ Calculate diversity loss
+
+        Diversity loss is defined as per:
+            Aakash Krishna GS, Tianyu Zhang, Omid Ardakanian, and Matthew E. Taylor,
+            “Mitigating an adoption battier of reinforcement learning-based control
+            strategies in buildings”, Energy and Buildings, 285:112878, 2023
+
+        Args:
+            obs (th.Tensor): Observation tensor
+            action (th.Tensor): Action tensor
+            returns (th.Tensor): Returns tensor
+            log_prob (th.Tensor): Log probability tensor
+
+        Returns:
+            diversity_losses (th.Tensor): Diversity loss tensor
+        """
         diversity_losses = th.zeros(len(obs), device=self.device)
         for i, zone in enumerate(list(obs.keys())):
             zn_obs = obs[zone]

@@ -2,6 +2,8 @@ import os
 
 
 class BaseDiversity():
+    """ Base class for diversity handlers
+    """
     @classmethod
     def is_diverse_training(cls, diversity_weight: float, diverse_policies_loc: str) -> bool:
         assert diversity_weight >= 0.0, "Diversity weight must be non-negative"

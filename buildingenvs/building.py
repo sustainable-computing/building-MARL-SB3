@@ -1,9 +1,12 @@
 from abc import abstractmethod
 import gym
-import torch as th
 
 
 class Building(gym.Env):
+    """Base class for the building environments
+
+    Inherits from gym.Env to provide a common interface for the building environments.
+    """
     def __init__(self, config: dict,
                  log_dir: str,
                  reward_signal: str = "standard",

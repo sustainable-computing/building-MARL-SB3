@@ -29,7 +29,8 @@ def evaluate(
     start_year: int = typer.Option(1991),
     save_path: str = typer.Option("data/policy_evaluation/brute_force/"),
     parallelize: bool = typer.Option(False),
-    max_cpu_cores: int = typer.Option(1),
+    num_splits: int = typer.Option(1),
+    split_idx: int = typer.Option(0),
     seed: int = typer.Option(1337),
     device: str = typer.Option("cpu")
 ):

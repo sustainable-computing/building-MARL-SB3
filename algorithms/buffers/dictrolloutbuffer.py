@@ -9,6 +9,12 @@ from typing import Optional
 
 
 class CustomDictRolloutBuffer(DictRolloutBuffer):
+    """Re-implementation of DictRolloutBuffer to support multi-dim action space
+
+    Re-implementation of DictRolloutBuffer to support multi-dim action space. The original DictRolloutBuffer
+    only supported single-dim action space. This class is a modified version of the original DictRolloutBuffer
+    to support multi-dim action space.
+    """
     def reset(self) -> None:
         assert isinstance(self.obs_shape, dict), "DictRolloutBuffer must be used with Dict obs space only"
         self.observations = {}

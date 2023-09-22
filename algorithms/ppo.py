@@ -14,6 +14,14 @@ import wandb
 
 
 class MultiAgentPPO(PPO):
+    """Re-implementation of PPO to support multi-dim action space
+
+    Attributes:
+        diverse_training (bool): Whether or not to use diverse training
+        diversity_handler (PPODiversityHandler): Diversity handler
+        retrain (bool): Whether or not to retrain
+            retrieved from kwargs if present, else defaults to False
+    """
     def __init__(self,
                  policy: BasePolicy = None,
                  env: gym.Env = None,
@@ -21,6 +29,18 @@ class MultiAgentPPO(PPO):
                  diverse_policy_library_loc: str = "",
                  diverse_policy_library_log_std_loc: str = "",
                  *args, **kwargs):
+        """Initialize MultiAgentPPO
+
+        Args:
+            policy (BasePolicy, optional): The policy model to use (MlpPolicy, CnnPolicy, ...)
+            env (gym.Env, optional): The environment to learn from
+            diversity_weight (float, optional): Weight for diversity loss
+            diverse_policy_library_loc (str, optional):  Path to diverse policy library
+            diverse_policy_library_log_std_loc (str, optional):  Path to log std file for diverse policy library
+
+        Raises:
+            AssertionError: if retrain is True and policy_map_config is not passed
+        """
         env = MultiAgentDummyVecEnv([lambda: env])
         super().__init__(policy, env, *args, **kwargs)
 
@@ -38,6 +58,8 @@ class MultiAgentPPO(PPO):
             assert "policy_map_config" in kwargs, "Must pass policy_map_config when retraining"
 
     def _setup_model(self) -> None:
+        """Initialize model, buffer, optimizer and learning rate schedule
+        """
 
         self._setup_lr_schedule()
         self.set_random_seed(self.seed)
@@ -71,7 +93,7 @@ class MultiAgentPPO(PPO):
 
     def train(self) -> None:
         """
-        Update policy using the currently gathered rollout buffer.
+        Re-implementation of the train method to support multi-dim action space and diverse training
         """
         # Switch to train mode (this affects batch norm / dropout)
         self.policy.set_training_mode(True)
@@ -83,11 +105,9 @@ class MultiAgentPPO(PPO):
         if self.clip_range_vf is not None:
             clip_range_vf = self.clip_range_vf(self._current_progress_remaining)
 
-        entropy_losses = []
         all_entropy_losses = [[] for _ in range(self.policy.action_space.shape[0])]
         all_pg_losses = [[] for _ in range(self.policy.action_space.shape[0])]
         all_value_losses = [[] for _ in range(self.policy.action_space.shape[0])]
-        pg_losses, value_losses = [], []
         clip_fractions = []
 
         continue_training = True

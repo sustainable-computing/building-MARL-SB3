@@ -35,7 +35,8 @@ def evaluate_policies(
     save_path: str = "data/policy_evaluation/brute_force/",
     energy_plus_loc: str = "/Applications/EnergyPlus-9-3-0/",
     parallelize: bool = False,
-    max_cpu_cores: int = 1,
+    num_splits: int = 1,
+    split_idx: int = 0,
     seed: int = 1337,
     device: str = "cpu"
 ):
@@ -50,9 +51,16 @@ def evaluate_policies(
     else:
         zones = [zone]
 
-    policies, policy_paths = load_policy_library(policy_library_path, policy_type,
+    all_policies, all_policy_paths = load_policy_library(policy_library_path, policy_type,
                                                  init_policy_log_std, init_policy_log_std_path,
                                                  eval_mode=False, device=device)
+    if not parallelize:
+        policies, policy_paths = all_policies, all_policy_paths
+    else:
+        split_policies = np.array_split(all_policies, num_splits)
+        split_policy_paths = np.array_split(all_policy_paths, num_splits)
+        policies, policy_paths = split_policies[split_idx], split_policy_paths[split_idx]
+
     total_energy_consumptions = {}
     for zone in zones:
         zone_env, config = _get_zone_env(building_env, building_config_loc, zone,
